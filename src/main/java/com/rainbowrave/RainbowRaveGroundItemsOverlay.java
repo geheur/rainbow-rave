@@ -218,6 +218,11 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 			}
 
 			final Color color = plugin.getItemColor(highlighted, hidden);
+			if (color.equals(Color.BLACK)) { // gross, but easy.
+				if (!plugin.isHotKeyPressed()) offsetMap.compute(item.getLocation(), (k, v) -> v != null ? v + 1 : 0);
+
+				continue;
+			}
 
 			if (config.highlightTiles())
 			{
@@ -348,26 +353,26 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 				if (topItem && (mouseInBox || mouseInHiddenBox || mouseInHighlightBox))
 				{
 					backgroundComponent.setRectangle(itemBounds);
-					backgroundComponent.render(graphics);
+//					backgroundComponent.render(graphics);
 				}
 
 				// Draw hidden box
-				drawRectangle(graphics, itemHiddenBox, topItem && mouseInHiddenBox ? Color.RED : color, hidden != null, true);
+//				drawRectangle(graphics, itemHiddenBox, topItem && mouseInHiddenBox ? Color.RED : color, hidden != null, true);
 
 				// Draw highlight box
-				drawRectangle(graphics, itemHighlightBox, topItem && mouseInHighlightBox ? Color.GREEN : color, highlighted != null, false);
+//				drawRectangle(graphics, itemHighlightBox, topItem && mouseInHighlightBox ? Color.GREEN : color, highlighted != null, false);
 			}
 
 			// When the hotkey is pressed the hidden/highlight boxes are drawn to the right of the text,
 			// so always draw the pie since it is on the left hand side.
 			if (groundItemTimers == DespawnTimerMode.PIE || plugin.isHotKeyPressed())
 			{
-				drawTimerPieOverlay(graphics, textX, textY, item);
+				drawTimerPieOverlay(graphics, textX, textY, item, color);
 			}
 			else if (groundItemTimers == DespawnTimerMode.SECONDS || groundItemTimers == DespawnTimerMode.TICKS)
 			{
 				Instant despawnTime = calculateDespawnTime(item);
-				Color timerColor = getItemTimerColor(item);
+				Color timerColor = color;
 				if (despawnTime != null && timerColor != null)
 				{
 					long despawnTimeMillis = despawnTime.toEpochMilli() - Instant.now().toEpochMilli();
@@ -525,12 +530,12 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		}
 	}
 
-	private void drawTimerPieOverlay(Graphics2D graphics, int textX, int textY, GroundItem groundItem)
+	private void drawTimerPieOverlay(Graphics2D graphics, int textX, int textY, GroundItem groundItem, Color color)
 	{
 		Instant now = Instant.now();
 		Instant spawnTime = groundItem.getSpawnTime();
 		Instant despawnTime = calculateDespawnTime(groundItem);
-		Color fillColor = getItemTimerColor(groundItem);
+		Color fillColor = color;
 
 		if (spawnTime == null || despawnTime == null || fillColor == null)
 		{

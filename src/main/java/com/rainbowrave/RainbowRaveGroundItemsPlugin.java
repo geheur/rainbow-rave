@@ -488,7 +488,7 @@ public class RainbowRaveGroundItemsPlugin
 	{
 		if (TRUE.equals(highlightedItems.getUnchecked(item)))
 		{
-			return rainbowRaveConfig.colorHighlightedGroundItems() ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.highlightedColor();
+			return rainbowRaveConfig.colorHighlightedGroundItems() ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 		}
 
 		// Explicit hide takes priority over implicit highlight
@@ -500,25 +500,25 @@ public class RainbowRaveGroundItemsPlugin
 		final int price = getValueByMode(gePrice, haPrice);
 		if (price > config.insaneValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.INSANE) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.insaneValueColor();
+			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.INSANE) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 		}
 
 		if (price > config.highValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIGH) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.highValueColor();
+			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIGH) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 		}
 
 		if (price > config.mediumValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.MEDIUM) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.mediumValueColor();
+			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.MEDIUM) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 		}
 
 		if (price > config.lowValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.LOW) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.lowValueColor();
+			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.LOW) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 		}
 
-		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.REGULAR) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.defaultColor();
+		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.REGULAR) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
 	}
 
 	Color getHidden(NamedQuantity item, int gePrice, int haPrice, boolean isTradeable)
@@ -531,7 +531,7 @@ public class RainbowRaveGroundItemsPlugin
 
 		// Explicit highlight takes priority over implicit hide
 		return isExplicitHidden || (!isExplicitHighlight && canBeHidden && underGe && underHa)
-			? rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIDDEN) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : config.hiddenColor()
+			? rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIDDEN) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK
 			: null;
 	}
 
