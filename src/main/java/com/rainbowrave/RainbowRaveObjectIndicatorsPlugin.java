@@ -79,7 +79,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 	private static final String MARK = "Mark object";
 	private static final String UNMARK = "Unmark object";
 
-	@Getter(AccessLevel.PACKAGE)
 	private final List<ColorTileObject> objects = new ArrayList<>();
 	private final List<ColorTileObject> allObjects = new ArrayList<>();
 	private final Map<Integer, Set<ObjectPoint>> points = new HashMap<>();
@@ -198,20 +197,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 			allObjects.clear();
 			objects.clear();
 		}
-	}
-
-	@Subscribe
-	public void onConfigChanged(ConfigChanged configChanged) {
-//		if (configChanged.getGroup().equals(RainbowRavePlugin.GROUP) && configChanged.getKey().equals("whichObjectsToHighlight")) {
-//			if (rainbowRaveConfig.whichObjectsToHighlight() != RainbowRaveConfig.ObjectsToHighlight.NONE)
-//			{
-//				clientThread.invokeLater(() -> {
-//					allObjects.clear();
-//					objects.clear();
-//					client.setGameState(GameState.CONNECTION_LOST);
-//				});
-//			}
-//		}
 	}
 
 	@Subscribe

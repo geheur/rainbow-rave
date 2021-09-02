@@ -53,7 +53,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.groundmarkers.GroundMarkerConfig;
-import net.runelite.client.plugins.groundmarkers.GroundMarkerOverlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import static net.runelite.http.api.RuneLiteAPI.GSON;
 
@@ -85,12 +84,6 @@ public class RainbowRaveGroundMarkerPlugin
 	private OverlayManager overlayManager;
 
 	@Inject
-	private GroundMarkerOverlay overlay;
-
-//	@Inject
-//	private GroundMarkerMinimapOverlay minimapOverlay;
-//
-	@Inject
 	private ChatboxPanelManager chatboxPanelManager;
 
 	@Inject
@@ -99,9 +92,6 @@ public class RainbowRaveGroundMarkerPlugin
 	@Inject
 	private EventBus eventBus;
 
-//	@Inject
-//	private GroundMarkerSharingManager sharingManager;
-//
 	@Inject
 	private Gson gson;
 
@@ -188,25 +178,11 @@ public class RainbowRaveGroundMarkerPlugin
 
 	public void startUp()
 	{
-//		overlayManager.add(overlay);
-//		if (config.showImportExport())
-//		{
-//			sharingManager.addImportExportMenuOptions();
-//		}
-//		if (config.showClear())
-//		{
-//			sharingManager.addClearMenuOption();
-//		}
 		loadPoints();
-//		eventBus.register(sharingManager);
 	}
 
 	public void shutDown()
 	{
-//		eventBus.unregister(sharingManager);
-		overlayManager.remove(overlay);
-//		overlayManager.remove(minimapOverlay);
-//		sharingManager.removeMenuOptions();
 		points.clear();
 	}
 

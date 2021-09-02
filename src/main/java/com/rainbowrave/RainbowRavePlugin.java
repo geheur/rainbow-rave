@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -15,6 +16,8 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.grounditems.GroundItemsConfig;
+import net.runelite.client.plugins.grounditems.GroundItemsPlugin;
 import net.runelite.client.plugins.groundmarkers.GroundMarkerConfig;
 import net.runelite.client.plugins.groundmarkers.GroundMarkerPlugin;
 import net.runelite.client.plugins.inventorytags.InventoryTagsConfig;
@@ -24,6 +27,7 @@ import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsPlugin;
 import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
 import net.runelite.client.plugins.objectindicators.ObjectIndicatorsPlugin;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
@@ -35,6 +39,7 @@ import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 @PluginDependency(GroundMarkerPlugin.class)
 @PluginDependency(ObjectIndicatorsPlugin.class)
 @PluginDependency(InventoryTagsPlugin.class)
+@PluginDependency(GroundItemsPlugin.class)
 public class RainbowRavePlugin extends Plugin
 {
 	public static final String GROUP = "rainbow_rave";
@@ -84,6 +89,14 @@ public class RainbowRavePlugin extends Plugin
 	private InventoryTagsConfig inventoryTagsConfig;
 
 	@Inject
+	private GroundItemsConfig groundItemsConfig;
+
+	@Inject
+	private RainbowRaveGroundItemsPlugin rainbowRaveGroundItemsPlugin;
+
+	private RainbowRaveGroundItemsOverlay rainbowRaveGroundItemsOverlay;
+
+	@Inject
 	private EventBus eventBus;
 
 	@Inject
@@ -91,6 +104,9 @@ public class RainbowRavePlugin extends Plugin
 
 	@Inject
 	private ConfigManager configManager;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Override
 	protected void startUp()
@@ -121,6 +137,13 @@ public class RainbowRavePlugin extends Plugin
 			rainbowRaveInventoryTagsOverlay = new RainbowRaveInventoryTagsOverlay(itemManager, this, inventoryTagsConfig, config, configManager);
 		}
 		overlayManager.add(rainbowRaveInventoryTagsOverlay);
+
+		if (rainbowRaveGroundItemsOverlay == null) {
+			rainbowRaveGroundItemsOverlay = new RainbowRaveGroundItemsOverlay(client, rainbowRaveGroundItemsPlugin, groundItemsConfig);
+		}
+		overlayManager.add(rainbowRaveGroundItemsOverlay);
+		rainbowRaveGroundItemsPlugin.startUp();
+		eventBus.register(rainbowRaveGroundItemsPlugin);
 	}
 
 	@Override
@@ -139,6 +162,10 @@ public class RainbowRavePlugin extends Plugin
 		eventBus.unregister(rainbowRaveNpcIndicatorsPlugin);
 
 		overlayManager.remove(rainbowRaveInventoryTagsOverlay);
+
+		overlayManager.remove(rainbowRaveGroundItemsOverlay);
+		rainbowRaveGroundItemsPlugin.shutDown();
+		eventBus.unregister(rainbowRaveGroundItemsPlugin);
 	}
 
 	@Provides
@@ -151,12 +178,28 @@ public class RainbowRavePlugin extends Plugin
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged) {
+		checkAndPushOverlayToFront(configChanged, "grounditemsplugin", rainbowRaveGroundItemsOverlay);
+		checkAndPushOverlayToFront(configChanged, "groundmarkerplugin", rainbowRaveGroundMarkerOverlay);
+		checkAndPushOverlayToFront(configChanged, "inventorytagsplugin", rainbowRaveInventoryTagsOverlay);
+		checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
+		checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
+		checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
+		
 		if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichNpcsToHighlight")) {
 			updateNpcHighlighterWithConfigSettings();
 		}
 	}
 
-	// TODO just modify the rainbow rave npc indicators plugin? May be simpler.
+	private void checkAndPushOverlayToFront(ConfigChanged configChanged, String key, Overlay overlay)
+	{
+		if (configChanged.getGroup().equals("runelite") && configChanged.getKey().equals(key) && configChanged.getNewValue().equalsIgnoreCase("true")) {
+			clientThread.invokeLater(() -> {
+				overlayManager.remove(overlay);
+				overlayManager.add(overlay);
+			});
+		}
+	}
+
 	private void updateNpcHighlighterWithConfigSettings()
 	{
 		Function<NPC, HighlightedNpc> f;

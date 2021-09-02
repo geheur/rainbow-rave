@@ -27,6 +27,16 @@ public interface RainbowRaveConfig extends Config
 		ALL
 	}
 
+	enum GroundItemsToColor {
+		NONE,
+		INSANE,
+		HIGH,
+		MEDIUM,
+		LOW,
+		REGULAR,
+		HIDDEN
+	}
+
 	@ConfigItem(
 		keyName = "colorSpeed",
 		name = "Color speed (ms)",
@@ -135,6 +145,28 @@ public interface RainbowRaveConfig extends Config
 	default ItemsToTag whichItemsToInventoryTag()
 	{
 		return ItemsToTag.SAME;
+	}
+
+	@ConfigItem(
+		keyName = "colorHighlightedGroundItems",
+		name = "Highlight Ground Items",
+		description = "Applies rainbow to highlighted items.",
+		position = 10
+	)
+	default boolean colorHighlightedGroundItems()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "whichGroundItemsToColor",
+		name = "Ground Items",
+		description = "Items in this tier and above are colored.",
+		position = 11
+	)
+	default GroundItemsToColor whichGroundItemsToColor()
+	{
+		return GroundItemsToColor.REGULAR;
 	}
 
 }

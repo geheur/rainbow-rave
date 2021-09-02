@@ -28,11 +28,8 @@ package com.rainbowrave;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
-import com.google.inject.Provides;
-import java.awt.Color;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,33 +45,23 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.GraphicID;
 import net.runelite.api.GraphicsObject;
-import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
-import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
-import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GraphicsObjectCreated;
-import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.npchighlight.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsService;
-import net.runelite.client.plugins.npchighlight.NpcMinimapOverlay;
-import net.runelite.client.plugins.npchighlight.NpcSceneOverlay;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.Text;
 import net.runelite.client.util.WildcardMatcher;
 
@@ -171,17 +158,11 @@ public class RainbowRaveNpcIndicatorsPlugin implements NpcIndicatorsService
 
 	private final List<Function<NPC, HighlightedNpc>> higlightPredicates = new ArrayList<>();
 
-	@Provides
-	NpcIndicatorsConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(NpcIndicatorsConfig.class);
-	}
-
-	public void configure(Binder binder)
-	{
-		binder.bind(NpcIndicatorsService.class).toInstance(this);
-	}
-
+//	public void configure(Binder binder)
+//	{
+//		binder.bind(NpcIndicatorsService.class).toInstance(this);
+//	}
+//
 	protected void startUp()
 	{
 		clientThread.invoke(() ->
