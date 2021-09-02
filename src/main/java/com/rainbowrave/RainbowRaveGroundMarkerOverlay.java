@@ -33,6 +33,8 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Stroke;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
+import java.util.Random;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
@@ -68,6 +70,8 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 
+	private Random random = new Random();
+
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
@@ -78,23 +82,36 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 		}
 
 		Stroke stroke = new BasicStroke((float) config.borderWidth());
-		for (final ColorTileMarker point : points)
+		try
 		{
-			WorldPoint worldPoint = point.getWorldPoint();
-			if (worldPoint.getPlane() != client.getPlane())
+			for (final ColorTileMarker point : points)
 			{
-				continue;
-			}
+				WorldPoint worldPoint = point.getWorldPoint();
+				if (worldPoint.getPlane() != client.getPlane())
+				{
+					continue;
+				}
 
-			int hashCode = rainbowRaveConfig.smoothWaves() ? (point.getWorldPoint().getX() + point.getWorldPoint().getY()) * 5 : (int) (Math.pow(point.getWorldPoint().getX(), 2) * 68 + Math.pow(point.getWorldPoint().getY(), 2) * 89) % 1000;
-			Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : Color.getHSBColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f, 1.0f, 1.0f);
-			if (tileColor == null || !config.rememberTileColors())
-			{
-				// If this is an old tile which has no color, or rememberTileColors is off, use marker color
-				tileColor = config.markerColor();
-			}
+				// This formula does not have a solid concept behind it, I just tried random stuff.
+				int hashCode;
+				if (rainbowRaveConfig.smoothWaves()) {
+					hashCode = (point.getWorldPoint().getX() + point.getWorldPoint().getY()) * 5;
+				} else {
+					random.setSeed((point.getWorldPoint().getX() << 16) + point.getWorldPoint().getY());
+					hashCode = random.nextInt(1000);
+				}
+				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : Color.getHSBColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f, 1.0f, 1.0f);
+				if (tileColor == null || !config.rememberTileColors())
+				{
+					// If this is an old tile which has no color, or rememberTileColors is off, use marker color
+					tileColor = config.markerColor();
+				}
 
-			drawTile(graphics, worldPoint, tileColor, point.getLabel(), stroke, rainbowRaveConfig.fillTiles());
+				drawTile(graphics, worldPoint, tileColor, point.getLabel(), stroke, rainbowRaveConfig.fillTiles());
+			}
+		} catch (ConcurrentModificationException e) {
+			// can happen when removing stuff from points, such as when disabling drawing brush markers tiles.
+			// don't care, doesn't have a significant visual effect.
 		}
 
 		return null;

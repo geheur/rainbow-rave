@@ -94,6 +94,9 @@ public class RainbowRaveGroundMarkerPlugin
 	private ChatboxPanelManager chatboxPanelManager;
 
 	@Inject
+	private RainbowRaveConfig rainbowRaveConfig;
+
+	@Inject
 	private EventBus eventBus;
 
 //	@Inject
@@ -117,6 +120,11 @@ public class RainbowRaveGroundMarkerPlugin
 
 	void loadPoints()
 	{
+		loadPoints(null, false);
+	}
+
+	void loadPoints(GroundMarkerPoint extraPoint, boolean added)
+	{
 		points.clear();
 
 		int[] regions = client.getMapRegions();
@@ -130,13 +138,25 @@ public class RainbowRaveGroundMarkerPlugin
 		{
 			// load points for region
 			log.debug("Loading points for region {}", regionId);
-			Collection<GroundMarkerPoint> regionPoints = getPoints(regionId);
+			Collection<GroundMarkerPoint> regionPoints = new ArrayList<>(getPoints(regionId));
+			if (extraPoint != null && !added)
+			{
+				regionPoints.remove(extraPoint);
+			}
 			Collection<ColorTileMarker> colorTileMarkers = translateToColorTileMarker(regionPoints);
 			points.addAll(colorTileMarkers);
 
-			Collection<GroundMarkerPoint> brushRegionPoints = getBrushPoints(regionId);
-			Collection<ColorTileMarker> brushColorTileMarkers = translateToColorTileMarker(brushRegionPoints);
-			points.addAll(brushColorTileMarkers);
+			if (extraPoint != null && added) {
+				colorTileMarkers = translateToColorTileMarker(Collections.singletonList(extraPoint));
+				points.addAll(colorTileMarkers);
+			}
+
+			if (rainbowRaveConfig.useBrushMarkerTiles())
+			{
+				Collection<GroundMarkerPoint> brushRegionPoints = getBrushPoints(regionId);
+				Collection<ColorTileMarker> brushColorTileMarkers = translateToColorTileMarker(brushRegionPoints);
+				points.addAll(brushColorTileMarkers);
+			}
 		}
 	}
 
@@ -230,6 +250,9 @@ public class RainbowRaveGroundMarkerPlugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
+		if (event.getGroup().equals(RainbowRavePlugin.GROUP) && event.getKey().equals("useBrushMarkerTiles")) {
+			loadPoints();
+		}
 		if (event.getGroup().equals(BRUSH_CONFIG_GROUP) && event.getKey().startsWith(REGION_PREFIX)) {
 			loadPoints();
 		}
@@ -267,16 +290,16 @@ public class RainbowRaveGroundMarkerPlugin
 		List<GroundMarkerPoint> groundMarkerPoints = new ArrayList<>(getPoints(regionId));
 		if (groundMarkerPoints.contains(point))
 		{
-			groundMarkerPoints.remove(point);
+			// since I don't save points this won't see any tiles added through ground markers immediately, hence the extra args.
+			loadPoints(point, false);
 		}
 		else
 		{
-			groundMarkerPoints.add(point);
+			// since I don't save points this won't see any tiles added through ground markers immediately, hence the extra args.
+			loadPoints(point, true);
 		}
 
 //		savePoints(regionId, groundMarkerPoints);
-
-		loadPoints();
 	}
 
 	private void labelTile(Tile tile)

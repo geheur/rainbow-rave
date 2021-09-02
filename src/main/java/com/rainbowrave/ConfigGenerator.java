@@ -82,14 +82,44 @@ public class ConfigGenerator
 
 		System.out.println(
 			SingleConfigGenerator.builder()
+				.key("useBrushMarkerTiles")
+				.name("Brush Marker Tiles")
+				.description("Applies rainbow to tile markers from the \\\"Brush Markers\\\" plugin hub plugin. This plugin can be used to mark lots of tiles at once.")
+				.defaultValue(false)
+				.typeName("boolean")
+				.build().generate()
+		);
+
+		System.out.println(
+			SingleConfigGenerator.builder()
 				.key("whichObjectsToHighlight")
 				.name("Object highlight")
-				.description("Which objects to highlight")
+				.description("Which objects to highlight.")
 				.defaultValue(RainbowRaveConfig.ObjectsToHighlight.SAME)
 				.typeName("ObjectsToHighlight")
 				.build().generate()
 		);
 
+		System.out.println(
+			SingleConfigGenerator.builder()
+				.key("whichItemsToInventoryTag")
+				.name("Inventory tags")
+				.description("Which items to tag.")
+				.defaultValue(RainbowRaveConfig.ItemsToTag.SAME)
+				.typeName("ItemsToTag")
+				.build().generate()
+		);
+
+//		System.out.println(
+//			SingleConfigGenerator.builder()
+//				.key("whichGroundItemsToColor")
+//				.name("Ground Items")
+//				.description("Which items to color in Ground Items.")
+//				.defaultValue(RainbowRaveConfig.GroundItemsToColor.SAME)
+//				.typeName("GroundItemsToColor")
+//				.build().generate()
+//		);
+//
 	}
 
 	@Builder

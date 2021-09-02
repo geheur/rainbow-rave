@@ -28,10 +28,9 @@ package com.rainbowrave;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Provides;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,9 +47,7 @@ import net.runelite.api.DecorativeObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.GroundObject;
-import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
@@ -64,15 +61,14 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
-import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.WallObjectChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
 import net.runelite.client.ui.overlay.OverlayManager;
 
@@ -85,6 +81,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	@Getter(AccessLevel.PACKAGE)
 	private final List<ColorTileObject> objects = new ArrayList<>();
+	private final List<ColorTileObject> allObjects = new ArrayList<>();
 	private final Map<Integer, Set<ObjectPoint>> points = new HashMap<>();
 
 	@Inject
@@ -104,6 +101,9 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	@Inject
 	private RainbowRaveConfig rainbowRaveConfig;
+
+	@Inject
+	private ClientThread clientThread;
 
 	protected void startUp()
 	{
@@ -195,8 +195,23 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 		if (gameStateChanged.getGameState() != GameState.LOGGED_IN && gameStateChanged.getGameState() != GameState.CONNECTION_LOST)
 		{
+			allObjects.clear();
 			objects.clear();
 		}
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged) {
+//		if (configChanged.getGroup().equals(RainbowRavePlugin.GROUP) && configChanged.getKey().equals("whichObjectsToHighlight")) {
+//			if (rainbowRaveConfig.whichObjectsToHighlight() != RainbowRaveConfig.ObjectsToHighlight.NONE)
+//			{
+//				clientThread.invokeLater(() -> {
+//					allObjects.clear();
+//					objects.clear();
+//					client.setGameState(GameState.CONNECTION_LOST);
+//				});
+//			}
+//		}
 	}
 
 	@Subscribe
@@ -246,12 +261,10 @@ public class RainbowRaveObjectIndicatorsPlugin
 		}
 
 		ObjectComposition objectComposition = client.getObjectDefinition(object.getId());
-		System.out.println("object composition: " + objectComposition.getName());
 		if (objectComposition.getImpostorIds() == null)
 		{
 			// Multiloc names are instead checked in the overlay
 			String name = objectComposition.getName();
-			System.out.println("name of impostor is " + name);
 			if (Strings.isNullOrEmpty(name) || name.equals("null"))
 			{
 				// was marked, but name has changed
@@ -259,28 +272,33 @@ public class RainbowRaveObjectIndicatorsPlugin
 			}
 		}
 
-		if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.ALL) {
-			objects.add(new ColorTileObject(object,
+		boolean found = false;
+		if (objectPoints != null)
+		{
+			for (ObjectPoint objectPoint : objectPoints)
+			{
+				if (worldPoint.getRegionX() == objectPoint.getRegionX()
+					&& worldPoint.getRegionY() == objectPoint.getRegionY()
+					&& worldPoint.getPlane() == objectPoint.getZ()
+					&& objectPoint.getId() == object.getId())
+				{
+					log.debug("Marking object {} due to matching {}", object, objectPoint);
+					objects.add(new ColorTileObject(object,
+						objectComposition,
+						objectPoint.getName(),
+						objectPoint.getColor()));
+					found = true;
+					break;
+				}
+			}
+		}
+
+		if (!found && rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.ALL) {
+			allObjects.add(new ColorTileObject(object,
 				objectComposition,
 				"name",
 				Color.WHITE));
 			return;
-		}
-
-		for (ObjectPoint objectPoint : objectPoints)
-		{
-			if (worldPoint.getRegionX() == objectPoint.getRegionX()
-					&& worldPoint.getRegionY() == objectPoint.getRegionY()
-					&& worldPoint.getPlane() == objectPoint.getZ()
-					&& objectPoint.getId() == object.getId())
-			{
-				log.debug("Marking object {} due to matching {}", object, objectPoint);
-				objects.add(new ColorTileObject(object,
-					objectComposition,
-					objectPoint.getName(),
-					objectPoint.getColor()));
-				break;
-			}
 		}
 	}
 
@@ -389,18 +407,23 @@ public class RainbowRaveObjectIndicatorsPlugin
 			}
 
 			log.debug("Unmarking object: {}", point);
+
+			allObjects.add(new ColorTileObject(object,
+				objectComposition,
+				"name",
+				Color.WHITE));
 		}
 		else
 		{
 			objectPoints.add(point);
-			objects.add(new ColorTileObject(object,
+			ColorTileObject o = new ColorTileObject(object,
 				client.getObjectDefinition(object.getId()),
 				name,
-				color));
+				color);
+			objects.add(o);
+			allObjects.removeIf(allO -> allO.getTileObject().equals(o.getTileObject()));
 			log.debug("Marking object: {}", point);
 		}
-
-//		savePoints(regionId, objectPoints);
 	}
 
 	private Set<ObjectPoint> loadPoints(final int id)
@@ -428,5 +451,14 @@ public class RainbowRaveObjectIndicatorsPlugin
 	{
 		ObjectComposition objectComposition = client.getObjectDefinition(id);
 		return objectComposition.getImpostorIds() == null ? objectComposition : objectComposition.getImpostor();
+	}
+
+	public List<ColorTileObject> getObjects() {
+		if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.NONE) return Collections.emptyList();
+		else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.SAME) return objects;
+
+		ArrayList<ColorTileObject> combinedObjects = new ArrayList<>(allObjects);
+		combinedObjects.addAll(objects);
+		return combinedObjects;
 	}
 }

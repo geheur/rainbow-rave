@@ -6,7 +6,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("rainbow_rave")
+@ConfigGroup(RainbowRavePlugin.GROUP)
 public interface RainbowRaveConfig extends Config
 {
 	enum NpcsToHighlight {
@@ -16,6 +16,12 @@ public interface RainbowRaveConfig extends Config
 	}
 
 	enum ObjectsToHighlight {
+		NONE,
+		SAME,
+		ALL
+	}
+
+	enum ItemsToTag {
 		NONE,
 		SAME,
 		ALL
@@ -99,14 +105,36 @@ public interface RainbowRaveConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "useBrushMarkerTiles",
+		name = "Brush Marker Tiles",
+		description = "Applies rainbow to tile markers from the \"Brush Markers\" plugin hub plugin. This plugin can be used to mark lots of tiles at once.",
+		position = 7
+	)
+	default boolean useBrushMarkerTiles()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "whichObjectsToHighlight",
 		name = "Object highlight",
-		description = "Which objects to highlight",
-		position = 7
+		description = "Which objects to highlight.",
+		position = 8
 	)
 	default ObjectsToHighlight whichObjectsToHighlight()
 	{
 		return ObjectsToHighlight.SAME;
+	}
+
+	@ConfigItem(
+		keyName = "whichItemsToInventoryTag",
+		name = "Inventory tags",
+		description = "Which items to tag.",
+		position = 9
+	)
+	default ItemsToTag whichItemsToInventoryTag()
+	{
+		return ItemsToTag.SAME;
 	}
 
 }
