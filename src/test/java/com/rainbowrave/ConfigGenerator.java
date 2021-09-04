@@ -1,6 +1,6 @@
 package com.rainbowrave;
 
-import lombok.Builder;
+//import lombok.Builder;
 
 public class ConfigGenerator
 {
@@ -127,6 +127,16 @@ public class ConfigGenerator
 //				.description("Items in this tier and above are colored.")
 //				.defaultValue(RainbowRaveConfig.GroundItemsToColor.REGULAR)
 //				.typeName("GroundItemsToColor")
+//				.build().generate()
+//		);
+//
+//		System.out.println(
+//			SingleConfigGenerator.builder()
+//				.key("recolorScytheSwings")
+//				.name("Scythe swings")
+//				.description("Recolor scythe swings. Swing trails may not return to normal after disabling.")
+//				.defaultValue(false)
+//				.typeName("boolean")
 //				.build().generate()
 //		);
 //

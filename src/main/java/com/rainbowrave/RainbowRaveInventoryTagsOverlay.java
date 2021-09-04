@@ -24,8 +24,6 @@
  */
 package com.rainbowrave;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -45,7 +43,6 @@ public class RainbowRaveInventoryTagsOverlay extends WidgetItemOverlay
 	private final RainbowRavePlugin rainbowRavePlugin;
 	private final InventoryTagsConfig config;
 	private final RainbowRaveConfig rainbowRaveConfig;
-	private final Cache<Long, Image> fillCache;
 
 	private ConfigManager configManager;
 
@@ -58,10 +55,7 @@ public class RainbowRaveInventoryTagsOverlay extends WidgetItemOverlay
 		this.configManager = configManager;
 		showOnEquipment();
 		showOnInventory();
-		fillCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(1)
-			.maximumSize(32)
-			.build();
+		showOnBank();
 	}
 
 	@Override
@@ -99,19 +93,7 @@ public class RainbowRaveInventoryTagsOverlay extends WidgetItemOverlay
 
 	private Image getFillImage(Color color, int itemId, int qty)
 	{
-		long key = (((long) itemId) << 32) | qty;
-		Image image = fillCache.getIfPresent(key);
-		if (image == null || true)
-		{
-			final Color fillColor = ColorUtil.colorWithAlpha(color, config.fillOpacity());
-			image = ImageUtil.fillImage(itemManager.getImage(itemId, qty, false), fillColor);
-			fillCache.put(key, image);
-		}
-		return image;
-	}
-
-	void invalidateCache()
-	{
-		fillCache.invalidateAll();
+		final Color fillColor = ColorUtil.colorWithAlpha(color, config.fillOpacity());
+		return ImageUtil.fillImage(itemManager.getImage(itemId, qty, false), fillColor);
 	}
 }

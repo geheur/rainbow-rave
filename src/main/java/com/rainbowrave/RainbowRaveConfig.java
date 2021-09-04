@@ -169,4 +169,26 @@ public interface RainbowRaveConfig extends Config
 		return GroundItemsToColor.REGULAR;
 	}
 
+	@ConfigItem(
+		keyName = "recolorScytheSwings",
+		name = "Scythe swings",
+		description = "Recolor scythe swings. Swing trails may not return to normal after disabling.",
+		position = 12
+	)
+	default boolean recolorScytheSwings()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "recolorLootBeams",
+		name = "Loot beams",
+		description = "Recolor loot beams.",
+		position = 13
+	)
+	default boolean recolorLootBeams()
+	{
+		return true;
+	}
+
 }
