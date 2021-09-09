@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.lang.reflect.Proxy;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Instant;
@@ -38,13 +39,14 @@ import java.util.Locale;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
+import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.npchighlight.HighlightedNpc;
+import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -103,14 +105,25 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			}
 		}
 
-		if (rainbowRaveConfig.highlightSelf()) {
-			renderNpcOverlay(graphics, plugin.highlightedNpc(null), client.getLocalPlayer());
-		}
-		if (rainbowRaveConfig.highlightOthers())
+		if (rainbowRaveConfig.highlightSelf() || rainbowRaveConfig.highlightOthers())
 		{
-			for (Player player : client.getPlayers())
+			// The NPC here is never used, but HighlightedNpc requires it to be non-null.
+			NPC npc = (NPC) Proxy.newProxyInstance(NPC.class.getClassLoader(),
+				new Class[]{NPC.class},
+				(a, b, c) -> {
+					throw new IllegalStateException();
+				});
+			if (rainbowRaveConfig.highlightSelf())
 			{
-				if (player != client.getLocalPlayer()) renderNpcOverlay(graphics, plugin.highlightedNpc(null), player);
+				renderNpcOverlay(graphics, plugin.highlightedNpc(npc), client.getLocalPlayer());
+			}
+			if (rainbowRaveConfig.highlightOthers())
+			{
+				for (Player player : client.getPlayers())
+				{
+					if (player != client.getLocalPlayer())
+						renderNpcOverlay(graphics, plugin.highlightedNpc(npc), player);
+				}
 			}
 		}
 

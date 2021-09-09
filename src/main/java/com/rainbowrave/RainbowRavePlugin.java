@@ -43,6 +43,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -52,7 +53,6 @@ import net.runelite.client.plugins.groundmarkers.GroundMarkerConfig;
 import net.runelite.client.plugins.groundmarkers.GroundMarkerPlugin;
 import net.runelite.client.plugins.inventorytags.InventoryTagsConfig;
 import net.runelite.client.plugins.inventorytags.InventoryTagsPlugin;
-import net.runelite.client.plugins.npchighlight.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsPlugin;
 import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
@@ -270,8 +270,8 @@ public class RainbowRavePlugin extends Plugin
 			if (
 				config.recolorScytheSwings() && (
 					scytheTrailIds.contains(graphicsObject.getId()) ||
-					(graphicsObject.getId() <= 1231 && graphicsObject.getId() >= 1235) || // chally trails + 1 red trail.
-					(graphicsObject.getId() <= 1898 && graphicsObject.getId() >= 1891) // sara and sang scythe swing trails
+					(graphicsObject.getId() >= 1231 && graphicsObject.getId() <= 1235) || // chally trails + 1 red trail.
+					(graphicsObject.getId() >= 1898 && graphicsObject.getId() <= 1891) // sara and sang scythe swing trails
 				) ||
 				config.recolorLootBeams() && graphicsObject instanceof RuneLiteObject
 			)

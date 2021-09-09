@@ -27,7 +27,6 @@ package com.rainbowrave;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Binder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,15 +57,14 @@ import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.plugins.npchighlight.HighlightedNpc;
+import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
-import net.runelite.client.plugins.npchighlight.NpcIndicatorsService;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 import net.runelite.client.util.WildcardMatcher;
 
 @Slf4j
-public class RainbowRaveNpcIndicatorsPlugin implements NpcIndicatorsService
+public class RainbowRaveNpcIndicatorsPlugin
 {
 	private static final int MAX_ACTOR_VIEW_RANGE = 15;
 
@@ -158,11 +156,6 @@ public class RainbowRaveNpcIndicatorsPlugin implements NpcIndicatorsService
 
 	private final List<Function<NPC, HighlightedNpc>> higlightPredicates = new ArrayList<>();
 
-//	public void configure(Binder binder)
-//	{
-//		binder.bind(NpcIndicatorsService.class).toInstance(this);
-//	}
-//
 	protected void startUp()
 	{
 		clientThread.invoke(() ->
@@ -436,7 +429,6 @@ public class RainbowRaveNpcIndicatorsPlugin implements NpcIndicatorsService
 		return Text.fromCSV(configNpcs);
 	}
 
-	@Override
 	public void rebuild()
 	{
 		highlights = getHighlights();
@@ -610,16 +602,17 @@ public class RainbowRaveNpcIndicatorsPlugin implements NpcIndicatorsService
 			.outline(config.highlightOutline())
 			.name(config.drawNames())
 			.nameOnMinimap(config.drawMinimapNames())
+			.borderWidth((float) config.borderWidth())
+			.outlineFeather(config.outlineFeather())
+			.render(n -> !n.isDead() || !config.ignoreDeadNpcs())
 			.build();
 	}
 
-	@Override
 	public void registerHighlighter(Function<NPC, HighlightedNpc> p)
 	{
 		higlightPredicates.add(p);
 	}
 
-	@Override
 	public void unregisterHighlighter(Function<NPC, HighlightedNpc> p)
 	{
 		higlightPredicates.remove(p);
