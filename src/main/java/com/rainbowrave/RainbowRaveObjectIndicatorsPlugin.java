@@ -112,6 +112,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 	{
 		points.clear();
 		objects.clear();
+		allObjects.clear();
 	}
 
 	@Subscribe
@@ -127,6 +128,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 		WallObject wallObject = event.getWallObject();
 
 		objects.removeIf(o -> o.getTileObject() == previous);
+		allObjects.removeIf(o -> o.getTileObject() == previous);
 		checkObjectPoints(wallObject);
 	}
 
@@ -134,6 +136,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 	public void onWallObjectDespawned(WallObjectDespawned event)
 	{
 		objects.removeIf(o -> o.getTileObject() == event.getWallObject());
+		allObjects.removeIf(o -> o.getTileObject() == event.getWallObject());
 	}
 
 	@Subscribe
@@ -152,12 +155,14 @@ public class RainbowRaveObjectIndicatorsPlugin
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
 		objects.removeIf(o -> o.getTileObject() == event.getGameObject());
+		allObjects.removeIf(o -> o.getTileObject() == event.getGameObject());
 	}
 
 	@Subscribe
 	public void onDecorativeObjectDespawned(DecorativeObjectDespawned event)
 	{
 		objects.removeIf(o -> o.getTileObject() == event.getDecorativeObject());
+		allObjects.removeIf(o -> o.getTileObject() == event.getDecorativeObject());
 	}
 
 	@Subscribe
@@ -170,6 +175,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 	public void onGroundObjectDespawned(GroundObjectDespawned event)
 	{
 		objects.removeIf(o -> o.getTileObject() == event.getGroundObject());
+		allObjects.removeIf(o -> o.getTileObject() == event.getGroundObject());
 	}
 
 	@Subscribe
