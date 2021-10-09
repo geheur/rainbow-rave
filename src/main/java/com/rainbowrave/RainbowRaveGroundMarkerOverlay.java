@@ -75,6 +75,8 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (!rainbowRaveConfig.rainbowTileMarkers()) return null;
+
 		final Collection<ColorTileMarker> points = plugin.getPoints();
 		if (points.isEmpty())
 		{
@@ -140,7 +142,11 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 				graphics.setColor(color);
 				graphics.fillPolygon(poly);
 			}
-			OverlayUtil.renderPolygon(graphics, poly, color, borderStroke);
+			graphics.setColor(color);
+			Stroke originalStroke = graphics.getStroke();
+			graphics.setStroke(borderStroke);
+			graphics.draw(poly);
+			graphics.setStroke(originalStroke);
 		}
 
 		if (!Strings.isNullOrEmpty(label))

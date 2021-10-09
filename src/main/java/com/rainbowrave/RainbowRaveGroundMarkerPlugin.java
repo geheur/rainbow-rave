@@ -136,17 +136,17 @@ public class RainbowRaveGroundMarkerPlugin
 			Collection<ColorTileMarker> colorTileMarkers = translateToColorTileMarker(regionPoints);
 			points.addAll(colorTileMarkers);
 
-			if (extraPoint != null && added) {
-				colorTileMarkers = translateToColorTileMarker(Collections.singletonList(extraPoint));
-				points.addAll(colorTileMarkers);
-			}
-
 			if (rainbowRaveConfig.useBrushMarkerTiles())
 			{
 				Collection<GroundMarkerPoint> brushRegionPoints = getBrushPoints(regionId);
 				Collection<ColorTileMarker> brushColorTileMarkers = translateToColorTileMarker(brushRegionPoints);
 				points.addAll(brushColorTileMarkers);
 			}
+		}
+
+		if (extraPoint != null && added) {
+			Collection<ColorTileMarker> colorTileMarkers = translateToColorTileMarker(Collections.singletonList(extraPoint));
+			points.addAll(colorTileMarkers);
 		}
 	}
 

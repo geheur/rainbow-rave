@@ -93,10 +93,21 @@ public interface RainbowRaveConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "rainbowTileMarkers",
+		name = "Rainbow tile markers",
+		description = "Make tile markers rainbow",
+		position = 5
+	)
+	default boolean rainbowTileMarkers()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "smoothWaves",
 		name = "Tile color waves",
 		description = "Whether the tiles should have a smooth transition from color to color between two adjacent tiles.",
-		position = 5
+		position = 6
 	)
 	default boolean smoothWaves()
 	{
@@ -107,7 +118,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "fillTiles",
 		name = "Fill tiles",
 		description = "Fills the tile with an opaque square.",
-		position = 6
+		position = 7
 	)
 	default boolean fillTiles()
 	{
@@ -118,7 +129,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "useBrushMarkerTiles",
 		name = "Brush Marker Tiles",
 		description = "Applies rainbow to tile markers from the \"Brush Markers\" plugin hub plugin. This plugin can be used to mark lots of tiles at once.",
-		position = 7
+		position = 8
 	)
 	default boolean useBrushMarkerTiles()
 	{
@@ -129,7 +140,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "whichObjectsToHighlight",
 		name = "Object highlight",
 		description = "Which objects to highlight.",
-		position = 8
+		position = 9
 	)
 	default ObjectsToHighlight whichObjectsToHighlight()
 	{
@@ -140,7 +151,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "whichItemsToInventoryTag",
 		name = "Inventory tags",
 		description = "Which items to tag.",
-		position = 9
+		position = 10
 	)
 	default ItemsToTag whichItemsToInventoryTag()
 	{
@@ -151,7 +162,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "colorHighlightedGroundItems",
 		name = "Highlight Ground Items",
 		description = "Applies rainbow to highlighted items.",
-		position = 10
+		position = 11
 	)
 	default boolean colorHighlightedGroundItems()
 	{
@@ -162,7 +173,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "whichGroundItemsToColor",
 		name = "Ground Items",
 		description = "Items in this tier and above are colored.",
-		position = 11
+		position = 12
 	)
 	default GroundItemsToColor whichGroundItemsToColor()
 	{
@@ -173,7 +184,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "recolorScytheSwings",
 		name = "Scythe swings",
 		description = "Recolor scythe swings. Swing trails may not return to normal after disabling.",
-		position = 12
+		position = 13
 	)
 	default boolean recolorScytheSwings()
 	{
@@ -184,7 +195,7 @@ public interface RainbowRaveConfig extends Config
 		keyName = "recolorLootBeams",
 		name = "Loot beams",
 		description = "Recolor loot beams.",
-		position = 13
+		position = 14
 	)
 	default boolean recolorLootBeams()
 	{
