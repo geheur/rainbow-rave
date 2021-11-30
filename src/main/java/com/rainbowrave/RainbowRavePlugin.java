@@ -271,7 +271,7 @@ public class RainbowRavePlugin extends Plugin
 				config.recolorScytheSwings() && (
 					scytheTrailIds.contains(graphicsObject.getId()) ||
 					(graphicsObject.getId() >= 1231 && graphicsObject.getId() <= 1235) || // chally trails + 1 red trail.
-					(graphicsObject.getId() >= 1898 && graphicsObject.getId() <= 1891) // sara and sang scythe swing trails
+					(graphicsObject.getId() >= 1891 && graphicsObject.getId() <= 1898) // sara and sang scythe swing trails
 				) ||
 				config.recolorLootBeams() && graphicsObject instanceof RuneLiteObject
 			)
