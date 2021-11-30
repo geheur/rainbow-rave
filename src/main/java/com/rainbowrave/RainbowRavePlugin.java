@@ -63,7 +63,8 @@ import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Rainbow Rave"
+	name = "Rainbow Rave",
+	tags = {"loot, beam"}
 )
 @PluginDependency(NpcIndicatorsPlugin.class)
 @PluginDependency(GroundMarkerPlugin.class)
