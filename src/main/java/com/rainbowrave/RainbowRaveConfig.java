@@ -95,7 +95,7 @@ public interface RainbowRaveConfig extends Config
 	@ConfigItem(
 		keyName = "rainbowTileMarkers",
 		name = "Rainbow tile markers",
-		description = "Make tile markers rainbow",
+		description = "Make tile markers rainbow (Ground Markers > Remember color per tile must be enabled)",
 		position = 5
 	)
 	default boolean rainbowTileMarkers()
