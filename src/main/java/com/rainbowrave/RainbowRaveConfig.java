@@ -35,6 +35,16 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
+	enum MouseTrailType {
+		NONE,
+		HIGH,
+	}
+
+	enum MouseTrailStyle {
+		CONTINUOUS,
+		TRAILING,
+	}
+
 	@ConfigItem(
 		keyName = "colorSpeed",
 		name = "Color speed (ms)",
@@ -198,6 +208,28 @@ public interface RainbowRaveConfig extends Config
 	default boolean recolorLootBeams()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+			keyName = "whichMouseTrailType",
+			name = "Mouse Trail Type",
+			description = "Which trail version to use.",
+			position = 15
+	)
+	default MouseTrailType whichMouseTrailType()
+	{
+		return MouseTrailType.NONE;
+	}
+
+	@ConfigItem(
+			keyName = "whichMouseTrailStyle",
+			name = "Mouse Trail Style",
+			description = "Which trail style to use.",
+			position = 16
+	)
+	default MouseTrailStyle whichMouseTrailStyle()
+	{
+		return MouseTrailStyle.CONTINUOUS;
 	}
 
 }
