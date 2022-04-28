@@ -234,7 +234,7 @@ public class RainbowRavePlugin extends Plugin
 		if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.ALL) {
 			f = npc -> rainbowRaveNpcIndicatorsPlugin.highlightedNpc(npc);
 			rainbowRaveNpcSceneOverlay.enable(true);
-		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.SAME) {
+		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.TAGGED) {
 			f = npc -> null;
 			rainbowRaveNpcSceneOverlay.enable(true);
 		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.NONE) {

@@ -446,7 +446,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	public List<ColorTileObject> getObjects() {
 		if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.NONE) return Collections.emptyList();
-		else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.SAME) return objects;
+		else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.MARKED) return objects;
 
 		ArrayList<ColorTileObject> combinedObjects = new ArrayList<>(allObjects);
 		combinedObjects.addAll(objects);

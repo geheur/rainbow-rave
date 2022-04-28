@@ -1,7 +1,5 @@
 package com.rainbowrave;
 
-import static com.rainbowrave.RainbowRaveConfig.NpcsToHighlight.SAME;
-import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -11,19 +9,19 @@ public interface RainbowRaveConfig extends Config
 {
 	enum NpcsToHighlight {
 		NONE,
-		SAME,
+		TAGGED,
 		ALL
 	}
 
 	enum ObjectsToHighlight {
 		NONE,
-		SAME,
+		MARKED,
 		ALL
 	}
 
 	enum ItemsToTag {
 		NONE,
-		SAME,
+		TAGGED,
 		ALL
 	}
 
@@ -89,7 +87,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default NpcsToHighlight whichNpcsToHighlight()
 	{
-		return SAME;
+		return NpcsToHighlight.TAGGED;
 	}
 
 	@ConfigItem(
@@ -144,7 +142,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default ObjectsToHighlight whichObjectsToHighlight()
 	{
-		return ObjectsToHighlight.SAME;
+		return ObjectsToHighlight.MARKED;
 	}
 
 	@ConfigItem(
@@ -155,7 +153,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default ItemsToTag whichItemsToInventoryTag()
 	{
-		return ItemsToTag.SAME;
+		return ItemsToTag.TAGGED;
 	}
 
 	@ConfigItem(

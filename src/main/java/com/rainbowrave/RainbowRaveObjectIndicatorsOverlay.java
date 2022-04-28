@@ -63,7 +63,7 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 		this.modelOutlineRenderer = modelOutlineRenderer;
 		this.rainbowRaveConfig = rainbowRaveConfig;
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(OverlayPriority.MED);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 
