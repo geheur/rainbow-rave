@@ -332,7 +332,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 				objectComposition,
 				"name",
 				Color.WHITE));
-			return;
 		}
 	}
 
