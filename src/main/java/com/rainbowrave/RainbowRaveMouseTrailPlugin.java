@@ -29,13 +29,8 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.awt.event.MouseEvent;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -43,23 +38,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.DecorativeObjectDespawned;
-import net.runelite.api.events.DecorativeObjectSpawned;
-import net.runelite.api.events.GameObjectDespawned;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GroundObjectDespawned;
-import net.runelite.api.events.GroundObjectSpawned;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.WallObjectChanged;
-import net.runelite.api.events.WallObjectDespawned;
-import net.runelite.api.events.WallObjectSpawned;
+import net.runelite.api.events.ClientTick;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
+import net.runelite.client.input.MouseManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
@@ -69,7 +53,9 @@ public class RainbowRaveMouseTrailPlugin
     private static final String MARK = "Mark object";
     private static final String UNMARK = "Unmark object";
 
-    private final List<ColorTileObject> objects = new ArrayList<>();
+    private final ArrayDeque<Curve> curve = new ArrayDeque<>();
+
+    private Point temp = null;
 
     @Inject
     private Client client;
@@ -81,6 +67,9 @@ public class RainbowRaveMouseTrailPlugin
     private OverlayManager overlayManager;
 
     @Inject
+    private MouseManager mouseManager;
+
+    @Inject
     private Gson gson;
 
     @Inject
@@ -89,23 +78,60 @@ public class RainbowRaveMouseTrailPlugin
     @Inject
     private ClientThread clientThread;
 
+    private RainbowRaveMouseListener mouseListener;
+
     protected void startUp()
     {
-        final Point mousePosition = client.getMouseCanvasPosition();
-
+        mouseListener = new RainbowRaveMouseListener(this);
+        setMouseListenerEnabled(true);
     }
 
     protected void shutDown()
     {
-        objects.clear();
+        curve.clear();
+
+        setMouseListenerEnabled(false);
+        mouseListener = null;
     }
 
-    public List<ColorTileObject> getObjects() {
-        if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.NONE) return Collections.emptyList();
-        else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.MARKED) return objects;
+    public void setMouseListenerEnabled(boolean enabled)
+    {
+        if (enabled)
+        {
+            mouseManager.registerMouseListener(mouseListener);
+        }
+        else
+        {
+            mouseManager.unregisterMouseListener(mouseListener);
+        }
+    }
 
-        ArrayList<ColorTileObject> combinedObjects = new ArrayList<>(objects);
-        combinedObjects.addAll(objects);
-        return combinedObjects;
+    @Subscribe
+    public void onClientTick(ClientTick event)
+    {
+        popTrail();
+        popTrail();
+    }
+
+    public void updateMousePositions(Point point) {
+        if(temp == null) {
+            temp = point;
+        } else {
+            curve.add(new Curve(temp, point));
+            temp = point;
+        }
+
+        // TODO Config - Size?
+        if(curve.size() > 100) {
+            curve.pop();
+        }
+    }
+
+    public ArrayDeque<Curve> getTrail() {
+        return curve;
+    }
+
+    public void popTrail() {
+        curve.pop();
     }
 }
