@@ -35,14 +35,11 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
-	enum MouseTrailType {
-		NONE,
-		HIGH,
-	}
-
 	enum MouseTrailStyle {
-		CONTINUOUS,
-		TRAILING,
+		NONE,
+		ENABLED,
+		SYNCED,
+		PARTYMODE,
 	}
 
 	@ConfigItem(
@@ -211,17 +208,6 @@ public interface RainbowRaveConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "whichMouseTrailType",
-			name = "Mouse Trail Type",
-			description = "Which trail version to use.",
-			position = 15
-	)
-	default MouseTrailType whichMouseTrailType()
-	{
-		return MouseTrailType.NONE;
-	}
-
-	@ConfigItem(
 			keyName = "whichMouseTrailStyle",
 			name = "Mouse Trail Style",
 			description = "Which trail style to use.",
@@ -229,7 +215,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default MouseTrailStyle whichMouseTrailStyle()
 	{
-		return MouseTrailStyle.CONTINUOUS;
+		return MouseTrailStyle.ENABLED;
 	}
 
 }

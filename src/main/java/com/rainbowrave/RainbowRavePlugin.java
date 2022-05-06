@@ -179,7 +179,7 @@ public class RainbowRavePlugin extends Plugin
 		eventBus.register(rainbowRaveGroundItemsPlugin);
 
 		if (rainbowRaveMouseTrailOverlay == null) {
-			rainbowRaveMouseTrailOverlay = new RainbowRaveMouseTrailOverlay(client, this, rainbowRaveMouseTrailPlugin, config);
+			rainbowRaveMouseTrailOverlay = new RainbowRaveMouseTrailOverlay(this, rainbowRaveMouseTrailPlugin, config);
 		}
 		overlayManager.add(rainbowRaveMouseTrailOverlay);
 		rainbowRaveMouseTrailPlugin.startUp();

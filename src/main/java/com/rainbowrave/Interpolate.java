@@ -2,8 +2,6 @@ package com.rainbowrave;
 
 import net.runelite.api.Point;
 
-// Helper class for interpolate functions
-// More can be added, then chosen from a dropdown in config
 public class Interpolate {
 
     /**
@@ -11,7 +9,7 @@ public class Interpolate {
      *
      * @param from The starting point.
      * @param to The ending point.
-     * @param t The interpolation progress starting at 0 and going to 1.
+     * @param t The interpolation progress starting at 0 and going to 1 (percent of distance between points).
      * @return The interpolated point.
      */
     public static Point interpolate(Point from, Point to, double t) {

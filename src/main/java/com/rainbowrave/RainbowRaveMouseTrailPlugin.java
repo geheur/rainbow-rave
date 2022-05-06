@@ -25,58 +25,23 @@
  */
 package com.rainbowrave;
 
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.awt.Color;
-import java.awt.event.MouseEvent;
 import java.util.*;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.ClientTick;
-import net.runelite.client.callback.ClientThread;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.input.MouseManager;
-import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 public class RainbowRaveMouseTrailPlugin
 {
-    private static final String CONFIG_GROUP = "objectindicators";
-    private static final String MARK = "Mark object";
-    private static final String UNMARK = "Unmark object";
-
     private final ArrayDeque<Curve> curve = new ArrayDeque<>();
-
     private Point temp = null;
 
     @Inject
-    private Client client;
-
-    @Inject
-    private ConfigManager configManager;
-
-    @Inject
-    private OverlayManager overlayManager;
-
-    @Inject
     private MouseManager mouseManager;
-
-    @Inject
-    private Gson gson;
-
-    @Inject
-    private RainbowRaveConfig rainbowRaveConfig;
-
-    @Inject
-    private ClientThread clientThread;
 
     private RainbowRaveMouseListener mouseListener;
 
@@ -113,18 +78,23 @@ public class RainbowRaveMouseTrailPlugin
         popTrail();
     }
 
-    public void updateMousePositions(Point point) {
-        if(temp == null) {
-            temp = point;
-        } else {
-            curve.add(new Curve(temp, point));
-            temp = point;
-        }
+    @Subscribe
+    public void onConfigChanged(ConfigChanged configChanged) {
 
-        // TODO Config - Size?
-        if(curve.size() > 100) {
-            curve.pop();
+        if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle")) {
+            System.out.println("Enabled: " + !configChanged.getNewValue().equals("NONE"));
+            setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
         }
+    }
+
+    public void updateMousePositions(Point point) {
+            if (curve.size() < 50) {
+                if (temp != null) {
+                    Curve current = new Curve(temp, point);
+                    curve.add(current);
+                }
+                temp = point;
+            }
     }
 
     public ArrayDeque<Curve> getTrail() {
@@ -132,6 +102,8 @@ public class RainbowRaveMouseTrailPlugin
     }
 
     public void popTrail() {
-        curve.pop();
+        if(curve.size() > 0) {
+            curve.pop();
+        }
     }
 }
