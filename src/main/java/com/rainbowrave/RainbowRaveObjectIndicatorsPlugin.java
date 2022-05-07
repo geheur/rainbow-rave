@@ -126,9 +126,8 @@ public class RainbowRaveObjectIndicatorsPlugin
 	{
 		if (event.getGroup().equals("rainbow_rave") && event.getKey().equals("whichObjectsToHighlight")) {
 			GameState gameState = client.getGameState();
-			// Check t	hat the player is logged in and that there are no objects saved
-			if (gameState == GameState.LOGGED_IN) {
-				if(event.getNewValue().equals("ALL"))
+			// Check that the player is logged in and that config set to All
+			if (gameState == GameState.LOGGED_IN && event.getNewValue().equals("ALL")) {
 				// Find objects and add their points to the list
 				initiateObjects();
 			}
