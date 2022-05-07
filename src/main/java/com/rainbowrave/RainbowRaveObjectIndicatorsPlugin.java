@@ -122,6 +122,20 @@ public class RainbowRaveObjectIndicatorsPlugin
 	}
 
 	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getGroup().equals("rainbow_rave") && event.getKey().equals("whichObjectsToHighlight")) {
+			GameState gameState = client.getGameState();
+			// Check t	hat the player is logged in and that there are no objects saved
+			if (gameState == GameState.LOGGED_IN) {
+				if(event.getNewValue().equals("ALL"))
+				// Find objects and add their points to the list
+				initiateObjects();
+			}
+		}
+	}
+
+	@Subscribe
 	public void onWallObjectSpawned(WallObjectSpawned event)
 	{
 		checkObjectPoints(event.getWallObject());
