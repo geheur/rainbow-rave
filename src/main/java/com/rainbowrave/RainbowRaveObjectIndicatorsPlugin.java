@@ -106,6 +106,12 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	protected void startUp()
 	{
+		GameState gameState = client.getGameState();
+		// Check that the player is logged in and that there are no objects saved
+		if (gameState == GameState.LOGGED_IN && getObjects().size() == 0) {
+			// Find objects and add their points to the list
+			initiateObjects();
+		}
 	}
 
 	protected void shutDown()
@@ -113,6 +119,19 @@ public class RainbowRaveObjectIndicatorsPlugin
 		points.clear();
 		objects.clear();
 		allObjects.clear();
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getGroup().equals("rainbow_rave") && event.getKey().equals("whichObjectsToHighlight")) {
+			GameState gameState = client.getGameState();
+			// Check that the player is logged in and that config set to All
+			if (gameState == GameState.LOGGED_IN && event.getNewValue().equals("ALL")) {
+				// Find objects and add their points to the list
+				initiateObjects();
+			}
+		}
 	}
 
 	@Subscribe
@@ -241,6 +260,42 @@ public class RainbowRaveObjectIndicatorsPlugin
 		markObject(objectDefinition, name, object);
 	}
 
+	private void initiateObjects() {
+		Scene scene = client.getScene();
+		Tile[][][] tiles = scene.getTiles();
+		final int z = client.getPlane();
+		// Loop tiles on current plane
+		for(int x = 0; x < tiles[z].length; x++) {
+			for(int y = 0; y < tiles[z][x].length; y++) {
+				// Find current tile and it's associated objects
+				final Tile tile = tiles[z][x][y];
+				final GameObject[] tileGameObjects = tile.getGameObjects();
+				final DecorativeObject tileDecorativeObject = tile.getDecorativeObject();
+				final WallObject tileWallObject = tile.getWallObject();
+				final GroundObject groundObject = tile.getGroundObject();
+
+				// Invoke on client thread
+				clientThread.invoke(() -> {
+					// Check object existence and add points to list
+					if(tileDecorativeObject != null) {
+						checkObjectPoints(tileDecorativeObject);
+					}
+					if(tileWallObject != null) {
+						checkObjectPoints(tileWallObject);
+					}
+					if(groundObject != null) {
+						checkObjectPoints(groundObject);
+					}
+					for(GameObject gameObject : tileGameObjects) {
+						if(gameObject != null) {
+							checkObjectPoints(gameObject);
+						}
+					}
+				});
+			}
+		}
+	}
+
 	private void checkObjectPoints(TileObject object)
 	{
 		final WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, object.getLocalLocation(), object.getPlane());
@@ -289,7 +344,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 				objectComposition,
 				"name",
 				Color.WHITE));
-			return;
 		}
 	}
 
@@ -446,7 +500,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	public List<ColorTileObject> getObjects() {
 		if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.NONE) return Collections.emptyList();
-		else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.SAME) return objects;
+		else if (rainbowRaveConfig.whichObjectsToHighlight() == RainbowRaveConfig.ObjectsToHighlight.MARKED) return objects;
 
 		ArrayList<ColorTileObject> combinedObjects = new ArrayList<>(allObjects);
 		combinedObjects.addAll(objects);

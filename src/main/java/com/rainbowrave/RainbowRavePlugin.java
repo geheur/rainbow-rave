@@ -234,7 +234,7 @@ public class RainbowRavePlugin extends Plugin
 		if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.ALL) {
 			f = npc -> rainbowRaveNpcIndicatorsPlugin.highlightedNpc(npc);
 			rainbowRaveNpcSceneOverlay.enable(true);
-		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.SAME) {
+		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.TAGGED) {
 			f = npc -> null;
 			rainbowRaveNpcSceneOverlay.enable(true);
 		} else if (config.whichNpcsToHighlight() == RainbowRaveConfig.NpcsToHighlight.NONE) {
@@ -308,17 +308,8 @@ public class RainbowRavePlugin extends Plugin
 		int[] faceColors2 = model.getFaceColors2();
 		int[] faceColors3 = model.getFaceColors3();
 
-		for (int i = 0; i < faceColors1.length; i++)
-		{
-			faceColors1[i] = rs2hsb;
-		}
-		for (int i = 0; i < faceColors2.length; i++)
-		{
-			faceColors2[i] = rs2hsb;
-		}
-		for (int i = 0; i < faceColors3.length; i++)
-		{
-			faceColors3[i] = rs2hsb;
-		}
+		Arrays.fill(faceColors1, rs2hsb);
+		Arrays.fill(faceColors2, rs2hsb);
+		Arrays.fill(faceColors3, rs2hsb);
 	}
 }
