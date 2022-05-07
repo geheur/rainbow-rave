@@ -261,7 +261,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 	}
 
 	private void initiateObjects() {
-		// Get scene, tiles, and current plane
 		Scene scene = client.getScene();
 		Tile[][][] tiles = scene.getTiles();
 		final int z = client.getPlane();
