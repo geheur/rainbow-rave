@@ -45,7 +45,7 @@ public class RainbowRaveMouseTrailPlugin
     @Inject
     private MouseManager mouseManager;
 
-    private MouseAdapter mouseAdapter = new MouseAdapter() {
+    private final MouseAdapter mouseAdapter = new MouseAdapter() {
         @Override
         public MouseEvent mouseMoved(MouseEvent event)
         {
