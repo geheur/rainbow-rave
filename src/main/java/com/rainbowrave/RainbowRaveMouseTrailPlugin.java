@@ -45,18 +45,17 @@ public class RainbowRaveMouseTrailPlugin
     @Inject
     private MouseManager mouseManager;
 
-    private MouseAdapter mouseAdapter;
+    private MouseAdapter mouseAdapter = new MouseAdapter() {
+        @Override
+        public MouseEvent mouseMoved(MouseEvent event)
+        {
+            updateMousePositions(new Point(event.getX(), event.getY()));
+            return event;
+        }
+    };
 
     protected void startUp()
     {
-        mouseAdapter = new MouseAdapter() {
-            @Override
-            public MouseEvent mouseMoved(MouseEvent event)
-            {
-                updateMousePositions(new Point(event.getX(), event.getY()));
-                return event;
-            }
-        };
         setMouseListenerEnabled(true);
     }
 
@@ -65,7 +64,6 @@ public class RainbowRaveMouseTrailPlugin
         curve.clear();
 
         setMouseListenerEnabled(false);
-        mouseAdapter = null;
     }
 
     public void setMouseListenerEnabled(boolean enabled)
