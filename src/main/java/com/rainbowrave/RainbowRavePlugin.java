@@ -228,7 +228,6 @@ public class RainbowRavePlugin extends Plugin
 		checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
 		checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
 		checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
-		checkAndPushOverlayToFront(configChanged, "mousetrailplugin", rainbowRaveMouseTrailOverlay);
 
 		if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichNpcsToHighlight")) {
 			updateNpcHighlighterWithConfigSettings();

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
- * Copyright (c) 2018, Adam <Adam@sigterm.info>
+ * Copyright (c) 2022, Ryan Bell <llaver@live.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,29 +24,39 @@
  */
 package com.rainbowrave;
 
+import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.Deque;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.ClientTick;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.input.MouseAdapter;
 import net.runelite.client.input.MouseManager;
 
 @Slf4j
 public class RainbowRaveMouseTrailPlugin
 {
-    private final ArrayDeque<Curve> curve = new ArrayDeque<>();
+    private final Deque<Curve> curve = new ArrayDeque<>();
     private Point temp = null;
 
     @Inject
     private MouseManager mouseManager;
 
-    private RainbowRaveMouseListener mouseListener;
+    private MouseAdapter mouseAdapter;
 
     protected void startUp()
     {
-        mouseListener = new RainbowRaveMouseListener(this);
+        mouseAdapter = new MouseAdapter() {
+            @Override
+            public MouseEvent mouseMoved(MouseEvent event)
+            {
+                updateMousePositions(new Point(event.getX(), event.getY()));
+                return event;
+            }
+        };
         setMouseListenerEnabled(true);
     }
 
@@ -56,18 +65,18 @@ public class RainbowRaveMouseTrailPlugin
         curve.clear();
 
         setMouseListenerEnabled(false);
-        mouseListener = null;
+        mouseAdapter = null;
     }
 
     public void setMouseListenerEnabled(boolean enabled)
     {
         if (enabled)
         {
-            mouseManager.registerMouseListener(mouseListener);
+            mouseManager.registerMouseListener(mouseAdapter);
         }
         else
         {
-            mouseManager.unregisterMouseListener(mouseListener);
+            mouseManager.unregisterMouseListener(mouseAdapter);
         }
     }
 
@@ -80,9 +89,7 @@ public class RainbowRaveMouseTrailPlugin
 
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-
         if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle")) {
-            System.out.println("Enabled: " + !configChanged.getNewValue().equals("NONE"));
             setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
         }
     }
@@ -97,7 +104,7 @@ public class RainbowRaveMouseTrailPlugin
             }
     }
 
-    public ArrayDeque<Curve> getTrail() {
+    public Deque<Curve> getTrail() {
         return curve;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
+ * Copyright (c) 2022, Ryan Bell <llaver@live.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@ package com.rainbowrave;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.Overlay;
@@ -50,24 +51,19 @@ class RainbowRaveMouseTrailOverlay extends Overlay
     }
 
     // Function the get the rainbow color for a particular point based on the size of the trail
-    private Color getRainbowColor(int minHue, int trailSize, int position) {
-        double currentPercent = (double) (position - minHue) / (trailSize - minHue);
-        float hue = (float) (currentPercent * (trailSize - minHue) + minHue);
+    private Color getRainbowColor(int trailSize, int position) {
+        double currentPercent = (double) (position) / (trailSize);
+        float hue = (float) (currentPercent * (trailSize));
         return Color.getHSBColor(hue / 100, 1.0f, 1.0f);
     }
 
     // Helper method to handle choosing the correct coloring function
     private Color getColor(int size, int position) {
-        if(rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.PARTYMODE) {
-            return getRainbowColor(0, size, position);
-        } else if (rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.ENABLED) {
-            return getRainbowColor(0, size, position);
-        } else if(rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.SYNCED) {
+        if (rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.SYNCED) {
             return rainbowRavePlugin.getColor(0);
-        } else {
-            // Fall back to standard coloring
-            return getRainbowColor(0, size, position);
         }
+        // Fall back to standard coloring
+        return getRainbowColor(size, position);
     }
 
     @Override
@@ -80,7 +76,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         // Set Partymode variables
         boolean isPartyMode = rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.PARTYMODE;
         // Get ArrayList of Curves
-        ArrayList<Curve> trail = new ArrayList<>(plugin.getTrail());
+        List<Curve> trail = new ArrayList<>(plugin.getTrail());
         // Points to track where to render a line between Curves
         Point midBefore = null;
         Point midAfter = null;
@@ -93,7 +89,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         // Loop through Curves of trail
         for(int i = 0; i < trail.size(); i++) {
             // Get Points from Curve
-            ArrayList<Point> points = trail.get(i).getCurve();
+            List<Point> points = trail.get(i).getCurve();
             // Loop through points
             for(int j = 0; j < points.size(); j++ ) {
 
@@ -105,7 +101,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
                 // Logic for setting points depending on where in the loops we are
                 if(i != 0 && j == 0) {
                     // Get previous list of points from the previous Curve
-                    ArrayList<Point> previousPoints = trail.get(i - 1).getCurve();
+                    List<Point> previousPoints = trail.get(i - 1).getCurve();
                     before = previousPoints.get(previousPoints.size() - 2);
                     after = points.get(j + 1);
                     previous = previousPoints.get(previousPoints.size() - 1);
