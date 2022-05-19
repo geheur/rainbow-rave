@@ -52,6 +52,12 @@ public class RainbowRaveMouseTrailPlugin
             updateMousePositions(new Point(event.getX(), event.getY()));
             return event;
         }
+        @Override
+        public MouseEvent mouseDragged(MouseEvent event)
+        {
+            updateMousePositions(new Point(event.getX(), event.getY()));
+            return event;
+        }
     };
 
     protected void startUp()
