@@ -37,6 +37,13 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
+	enum MouseTrailStyle {
+		NONE,
+		ENABLED,
+		SYNCED,
+		PARTYMODE,
+	}
+
 	@ConfigItem(
 		keyName = "colorSpeed",
 		name = "Color speed (ms)",
@@ -200,6 +207,17 @@ public interface RainbowRaveConfig extends Config
 	default boolean recolorLootBeams()
 	{
 		return true;
+	}
+
+	@ConfigItem(
+			keyName = "whichMouseTrailStyle",
+			name = "Mouse Trail Style",
+			description = "Which trail style to use.",
+			position = 16
+	)
+	default MouseTrailStyle whichMouseTrailStyle()
+	{
+		return MouseTrailStyle.ENABLED;
 	}
 
 }

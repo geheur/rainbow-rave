@@ -125,6 +125,11 @@ public class RainbowRavePlugin extends Plugin
 	private RainbowRaveGroundItemsOverlay rainbowRaveGroundItemsOverlay;
 
 	@Inject
+	private RainbowRaveMouseTrailPlugin rainbowRaveMouseTrailPlugin;
+
+	private RainbowRaveMouseTrailOverlay rainbowRaveMouseTrailOverlay;
+
+	@Inject
 	private EventBus eventBus;
 
 	@Inject
@@ -172,6 +177,13 @@ public class RainbowRavePlugin extends Plugin
 		overlayManager.add(rainbowRaveGroundItemsOverlay);
 		rainbowRaveGroundItemsPlugin.startUp();
 		eventBus.register(rainbowRaveGroundItemsPlugin);
+
+		if (rainbowRaveMouseTrailOverlay == null) {
+			rainbowRaveMouseTrailOverlay = new RainbowRaveMouseTrailOverlay(this, rainbowRaveMouseTrailPlugin, config);
+		}
+		overlayManager.add(rainbowRaveMouseTrailOverlay);
+		rainbowRaveMouseTrailPlugin.startUp();
+		eventBus.register(rainbowRaveMouseTrailPlugin);
 	}
 
 	@Override
@@ -194,6 +206,10 @@ public class RainbowRavePlugin extends Plugin
 		overlayManager.remove(rainbowRaveGroundItemsOverlay);
 		rainbowRaveGroundItemsPlugin.shutDown();
 		eventBus.unregister(rainbowRaveGroundItemsPlugin);
+
+		overlayManager.remove(rainbowRaveMouseTrailOverlay);
+		rainbowRaveMouseTrailPlugin.shutDown();
+		eventBus.unregister(rainbowRaveMouseTrailPlugin);
 	}
 
 	@Provides
@@ -212,7 +228,7 @@ public class RainbowRavePlugin extends Plugin
 		checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
 		checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
 		checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
-		
+
 		if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichNpcsToHighlight")) {
 			updateNpcHighlighterWithConfigSettings();
 		}
