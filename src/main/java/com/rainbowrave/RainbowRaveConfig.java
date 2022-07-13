@@ -220,4 +220,14 @@ public interface RainbowRaveConfig extends Config
 		return MouseTrailStyle.ENABLED;
 	}
 
+	@ConfigItem(
+			keyName = "mouseTrailLength",
+			name = "Mouse Trail Length",
+			description = "How long should the trail be.",
+			position = 17
+	)
+	default int mouseTrailLength()
+	{
+		return 50;
+	}
 }
