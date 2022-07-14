@@ -45,6 +45,9 @@ public class RainbowRaveMouseTrailPlugin
     @Inject
     private MouseManager mouseManager;
 
+    @Inject
+    private RainbowRaveConfig config;
+
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         @Override
         public MouseEvent mouseMoved(MouseEvent event)
@@ -68,8 +71,13 @@ public class RainbowRaveMouseTrailPlugin
     protected void shutDown()
     {
         curve.clear();
-
         setMouseListenerEnabled(false);
+    }
+
+    protected void restart()
+    {
+        shutDown();
+        startUp();
     }
 
     public void setMouseListenerEnabled(boolean enabled)
@@ -93,13 +101,17 @@ public class RainbowRaveMouseTrailPlugin
 
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle")) {
-            setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
+        if (!configChanged.getGroup().equals("rainbow_rave")){
+            return;
+        }
+        setMouseListenerEnabled(config.whichMouseTrailStyle() != RainbowRaveConfig.MouseTrailStyle.NONE);
+        if (configChanged.getKey().equals("mouseTrailLength")) {
+            restart();
         }
     }
 
     public void updateMousePositions(Point point) {
-            if (curve.size() < 50) {
+            if (curve.size() < config.mouseTrailLength()) {
                 if (temp != null) {
                     Curve current = new Curve(temp, point);
                     curve.add(current);
