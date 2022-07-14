@@ -45,6 +45,17 @@ public interface RainbowRaveConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "theme",
+			name = "Theme",
+			description = "What theme should the colors be?",
+			position = 0
+	)
+	default Theme theme()
+	{
+		return Theme.DEFAULT;
+	}
+
+	@ConfigItem(
 		keyName = "colorSpeed",
 		name = "Color speed (ms)",
 		description = "How fast the colors change (ms per full cycle)",

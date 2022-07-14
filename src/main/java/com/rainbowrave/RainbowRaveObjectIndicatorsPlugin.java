@@ -62,7 +62,6 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.WallObjectChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.client.callback.ClientThread;
@@ -119,17 +118,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 	public void onWallObjectSpawned(WallObjectSpawned event)
 	{
 		checkObjectPoints(event.getWallObject());
-	}
-
-	@Subscribe
-	public void onWallObjectChanged(WallObjectChanged event)
-	{
-		WallObject previous = event.getPrevious();
-		WallObject wallObject = event.getWallObject();
-
-		objects.removeIf(o -> o.getTileObject() == previous);
-		allObjects.removeIf(o -> o.getTileObject() == previous);
-		checkObjectPoints(wallObject);
 	}
 
 	@Subscribe

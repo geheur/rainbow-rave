@@ -26,15 +26,11 @@
 package com.rainbowrave;
 
 import com.google.common.base.Strings;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Stroke;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Random;
+
+import java.awt.*;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
@@ -102,7 +98,7 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 					random.setSeed((point.getWorldPoint().getX() << 16) + point.getWorldPoint().getY());
 					hashCode = random.nextInt(1000);
 				}
-				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : Color.getHSBColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f, 1.0f, 1.0f);
+				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : rainbowRaveConfig.theme().getColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f);
 				if (tileColor == null || !config.rememberTileColors())
 				{
 					// If this is an old tile which has no color, or rememberTileColors is off, use marker color
