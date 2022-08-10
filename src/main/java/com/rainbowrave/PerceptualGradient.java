@@ -2,6 +2,10 @@ package com.rainbowrave;
 
 import java.awt.Color;
 
+/*
+The explanation of the gradient algorithm used can be found here.
+https://stackoverflow.com/questions/22607043/color-gradient-algorithm/49321304#49321304
+ */
 public class PerceptualGradient
 {
     private static final double GAMMA = .43;
