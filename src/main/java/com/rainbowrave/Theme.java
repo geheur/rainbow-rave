@@ -1,7 +1,5 @@
 package com.rainbowrave;
 
-import jdk.nashorn.internal.objects.annotations.Getter;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.List;
 
 public enum Theme
 {
-    DEFAULT(new Color[]{}),
+    DEFAULT,
     TRANS(new Color[]{
             new Color(91, 206, 250),
             new Color(245, 169, 184),
@@ -24,7 +22,7 @@ public enum Theme
             new Color(252, 244, 52),
             new Color(255, 255, 255),
     }),
-    LES(new Color[]{
+    LESBIAN(new Color[]{
             new Color(212, 44, 0),
             new Color(253, 152, 85),
             new Color(255, 255, 255),
@@ -66,10 +64,14 @@ public enum Theme
             new Color(38, 206, 170),
             new Color(152, 232, 193),
             new Color(255, 255, 255),
-    }),
-    ;
+    });
 
     private final List<PerceptualGradient> gradients;
+
+    Theme()
+    {
+        gradients = new ArrayList<>();
+    }
 
     Theme(Color[] colors) {
         gradients = new ArrayList<>();
