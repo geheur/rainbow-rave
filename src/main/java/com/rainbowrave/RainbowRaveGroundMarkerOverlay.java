@@ -26,11 +26,15 @@
 package com.rainbowrave;
 
 import com.google.common.base.Strings;
-
-import java.awt.*;
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.List;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Stroke;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
+import java.util.Random;
 import javax.annotation.Nullable;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
