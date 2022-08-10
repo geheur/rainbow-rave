@@ -103,12 +103,6 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 					hashCode = random.nextInt(1000);
 				}
 				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : rainbowRaveConfig.theme().getColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f);
-				if (tileColor == null || !config.rememberTileColors())
-				{
-					// If this is an old tile which has no color, or rememberTileColors is off, use marker color
-					tileColor = config.markerColor();
-				}
-
 				drawTile(graphics, worldPoint, tileColor, point.getLabel(), stroke, rainbowRaveConfig.fillTiles());
 			}
 		} catch (ConcurrentModificationException e) {
