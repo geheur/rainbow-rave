@@ -13,14 +13,12 @@ public enum Theme
             new Color(245, 169, 184),
             new Color(255, 255, 255),
             new Color(245, 169, 184),
-            new Color(91, 206, 250)
     }),
     ENBY(new Color[]{
             new Color(255, 255, 255),
             new Color(156, 89, 209),
             new Color(44, 44, 44),
             new Color(252, 244, 52),
-            new Color(255, 255, 255),
     }),
     LESBIAN(new Color[]{
             new Color(212, 44, 0),
@@ -35,14 +33,12 @@ public enum Theme
             new Color(255, 216, 0),
             new Color(255, 33, 140),
             new Color(33, 177, 255),
-            new Color(255, 33, 140),
     }),
     ACE(new Color[]{
             new Color(0, 0, 0),
             new Color(163, 163, 163),
             new Color(255, 255, 255),
             new Color(128, 0, 128),
-            new Color(0, 0, 0)
     }),
     BI(new Color[]{
             new Color(214, 2, 112),
@@ -53,7 +49,6 @@ public enum Theme
             new Color(181, 126, 220),
             new Color(255, 255, 255),
             new Color(74, 129, 35),
-            new Color(181, 126, 220),
     }),
     GAY(new Color[]{
             new Color(255, 255, 255),
@@ -63,7 +58,6 @@ public enum Theme
             new Color(7, 141, 112),
             new Color(38, 206, 170),
             new Color(152, 232, 193),
-            new Color(255, 255, 255),
     });
 
     private final List<PerceptualGradient> gradients;
@@ -75,8 +69,11 @@ public enum Theme
 
     Theme(Color[] colors) {
         gradients = new ArrayList<>();
-        for (int i=0; i<colors.length-1; i++) {
-            gradients.add(new PerceptualGradient(colors[i], colors[i+1]));
+        for (int i=0; i<colors.length; i++) {
+            Color startColor = colors[i];
+            // When at the last index then wrap back to first color
+            Color endColor = i == colors.length-1 ? colors[0] : colors[i+1];
+            gradients.add(new PerceptualGradient(startColor, endColor));
         }
     }
 
