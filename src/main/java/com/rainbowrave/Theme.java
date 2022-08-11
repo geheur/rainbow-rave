@@ -7,7 +7,7 @@ import java.util.List;
 
 public enum Theme
 {
-    DEFAULT,
+    RAINBOW,
     TRANS(new Color[]{
             new Color(91, 206, 250),
             new Color(245, 169, 184),
@@ -82,7 +82,7 @@ public enum Theme
         // Subtract floor to match Color.getHSBColor() functionality
         ratio = Math.abs((float) (ratio - Math.floor(ratio)));
 
-        if (gradients.size() == 0) {
+        if (gradients.size() == 0) { // This applies to the RAINBOW theme only.
             return Color.getHSBColor(ratio, 1.0f, 1.0f);
         }
 
