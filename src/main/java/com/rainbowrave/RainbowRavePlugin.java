@@ -184,6 +184,19 @@ public class RainbowRavePlugin extends Plugin
 		overlayManager.add(rainbowRaveMouseTrailOverlay);
 		rainbowRaveMouseTrailPlugin.startUp();
 		eventBus.register(rainbowRaveMouseTrailPlugin);
+
+		migrateConfig();
+	}
+
+	private void migrateConfig()
+	{
+		String previousSmoothWaves = configManager.getConfiguration(GROUP, RainbowRaveConfig.OLD_TILE_COLOR_WAVES_KEY);
+		if (previousSmoothWaves != null) {
+			if (Boolean.valueOf(previousSmoothWaves)) {
+				configManager.setConfiguration(GROUP, RainbowRaveConfig.GROUND_MARKER_COLOR_MODE_KEY, RainbowRaveConfig.GroundMarkerColorMode.WAVES);
+			} // else it would be "random" which is default
+			configManager.unsetConfiguration(GROUP, RainbowRaveConfig.OLD_TILE_COLOR_WAVES_KEY);
+		}
 	}
 
 	@Override

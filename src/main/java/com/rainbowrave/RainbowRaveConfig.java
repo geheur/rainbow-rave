@@ -36,6 +36,12 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
+	enum GroundMarkerColorMode {
+		WAVES,
+		RANDOM,
+		COLOR_SYNC
+	}
+
 	enum MouseTrailStyle {
 		NONE,
 		ENABLED,
@@ -120,15 +126,18 @@ public interface RainbowRaveConfig extends Config
 		return true;
 	}
 
+	String OLD_TILE_COLOR_WAVES_KEY = "smoothWaves";
+	String GROUND_MARKER_COLOR_MODE_KEY = "groundMarkerColorMode";
+
 	@ConfigItem(
-		keyName = "smoothWaves",
-		name = "Tile color waves",
-		description = "Whether the tiles should have a smooth transition from color to color between two adjacent tiles.",
+		keyName = GROUND_MARKER_COLOR_MODE_KEY,
+		name = "Tile Color Mode",
+		description = "\"waves\" makes tile color smooth between adjacent tiles, and \"color sync\" makes tiles with the same color in ground markers share the same color.",
 		position = 6
 	)
-	default boolean smoothWaves()
+	default GroundMarkerColorMode groundMarkerColorMode()
 	{
-		return false;
+		return GroundMarkerColorMode.RANDOM;
 	}
 
 	@ConfigItem(
