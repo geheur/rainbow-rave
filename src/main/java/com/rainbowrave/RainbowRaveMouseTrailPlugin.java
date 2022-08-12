@@ -39,8 +39,9 @@ import net.runelite.client.input.MouseManager;
 @Slf4j
 public class RainbowRaveMouseTrailPlugin
 {
-    private final Deque<Curve> curve = new ArrayDeque<>();
+    private final Deque<Curve> curves = new ArrayDeque<>();
     private Point temp = null;
+    private int trailLength = 0;
 
     @Inject
     private MouseManager mouseManager;
@@ -65,12 +66,14 @@ public class RainbowRaveMouseTrailPlugin
 
     protected void startUp()
     {
+        trailLength = 0;
         setMouseListenerEnabled(true);
     }
 
     protected void shutDown()
     {
-        curve.clear();
+        curves.clear();
+        trailLength = 0;
         setMouseListenerEnabled(false);
     }
 
@@ -111,22 +114,27 @@ public class RainbowRaveMouseTrailPlugin
     }
 
     public void updateMousePositions(Point point) {
-            if (curve.size() < config.mouseTrailLength()) {
+            if (curves.size() < config.mouseTrailLength()) {
                 if (temp != null) {
                     Curve current = new Curve(temp, point);
-                    curve.add(current);
+                    curves.add(current);
+                    trailLength += current.getCurve().size();
                 }
                 temp = point;
             }
     }
 
     public Deque<Curve> getTrail() {
-        return curve;
+        return curves;
+    }
+
+    public int getTrailLength() {
+        return trailLength;
     }
 
     public void popTrail() {
-        if(curve.size() > 0) {
-            curve.pop();
+        if(curves.size() > 0) {
+            trailLength -= curves.pop().getCurve().size();
         }
     }
 }

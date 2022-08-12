@@ -50,20 +50,20 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         setLayer(OverlayLayer.ABOVE_WIDGETS);
     }
 
-    // Function the get the rainbow color for a particular point based on the size of the trail
-    private Color getRainbowColor(int trailSize, int position) {
-        double currentPercent = (double) (position) / (trailSize);
-        float hue = (float) (currentPercent * (trailSize));
-        return Color.getHSBColor(hue / 100, 1.0f, 1.0f);
-    }
-
-    // Helper method to handle choosing the correct coloring function
-    private Color getColor(int size, int position) {
-        if (rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.SYNCED) {
-            return rainbowRavePlugin.getColor(0);
+    // Function the get the rainbow color for a particular point
+    private Color getColor(int position) {
+        // TODO hook curve size multiplier into config
+        float currentPercent = (float) position / plugin.getTrailLength();
+        switch (rainbowRaveConfig.whichMouseTrailStyle()) {
+            case SYNCED:
+                return rainbowRavePlugin.getColor(0);
+            case PARTYMODE:
+                // This allows the color cycle to repeat 3 times for every 50 curves
+                // and allowing party mode to have a similar effect regardless of the trail length
+                float partyScale = (plugin.getTrail().size() / 50f) * 3;
+                currentPercent = position / (plugin.getTrailLength() / partyScale);
         }
-        // Fall back to standard coloring
-        return getRainbowColor(size, position);
+        return Color.getHSBColor(currentPercent, 1.0f, 1.0f);
     }
 
     @Override
@@ -73,8 +73,6 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         if (rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.NONE) {
             return null;
         }
-        // Set Partymode variables
-        boolean isPartyMode = rainbowRaveConfig.whichMouseTrailStyle() == RainbowRaveConfig.MouseTrailStyle.PARTYMODE;
         // Get ArrayList of Curves
         List<Curve> trail = new ArrayList<>(plugin.getTrail());
         // Points to track where to render a line between Curves
@@ -86,6 +84,8 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         // Fallback default color
         graphics.setColor(Color.BLUE);
+        // Position keeps track of how many points have been iterated over
+        int position = 0;
         // Loop through Curves of trail
         for(int i = 0; i < trail.size(); i++) {
             // Get Points from Curve
@@ -125,14 +125,8 @@ class RainbowRaveMouseTrailOverlay extends Overlay
                 } else if (j == 2 && midBefore != null) {
                         midAfter = points.get(j);
                 }
-                // Set position and size of trail
-                // Multiply by five due to preset size of Curve
-                // TODO hook curve size multiplier into config
-                int position = i * 5 + j;
-                int size = trail.size() * 5;
-                // Get the rainbow color from helper method.
-                // Dividing by 3 to throttle the speed of the rainbow color
-                final Color color = getColor(isPartyMode ? size : size / 3, isPartyMode ? position : position / 3);
+                // Get the rainbow color from helper method based on current position.
+                final Color color = getColor(position);
                 graphics.setColor(color);
 
                 // Draw lines of the trail
@@ -151,6 +145,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
                     midBefore = midAfter;
                     midAfter = null;
                 }
+                position++;
             }
         }
         return null;
