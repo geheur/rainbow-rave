@@ -102,7 +102,7 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 					random.setSeed((point.getWorldPoint().getX() << 16) + point.getWorldPoint().getY());
 					hashCode = random.nextInt(1000);
 				}
-				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : Color.getHSBColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f, 1.0f, 1.0f);
+				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : rainbowRaveConfig.theme().getColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f);
 				drawTile(graphics, worldPoint, tileColor, point.getLabel(), stroke, rainbowRaveConfig.fillTiles());
 			}
 		} catch (ConcurrentModificationException e) {

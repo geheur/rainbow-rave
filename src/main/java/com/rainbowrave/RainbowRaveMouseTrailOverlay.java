@@ -52,9 +52,9 @@ class RainbowRaveMouseTrailOverlay extends Overlay
 
     // Function the get the rainbow color for a particular point based on the size of the trail
     private Color getRainbowColor(int trailSize, int position) {
-        double currentPercent = (double) (position) / (trailSize);
-        float hue = (float) (currentPercent * (trailSize));
-        return Color.getHSBColor(hue / 100, 1.0f, 1.0f);
+        float currentPercent = (float) (position) / (trailSize);
+        float hue = currentPercent * (trailSize);
+        return rainbowRaveConfig.theme().getColor(hue / 100f);
     }
 
     // Helper method to handle choosing the correct coloring function

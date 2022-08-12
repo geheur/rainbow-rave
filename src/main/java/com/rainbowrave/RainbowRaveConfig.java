@@ -1,7 +1,6 @@
 package com.rainbowrave;
 
 import static com.rainbowrave.RainbowRaveConfig.NpcsToHighlight.SAME;
-import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -42,6 +41,17 @@ public interface RainbowRaveConfig extends Config
 		ENABLED,
 		SYNCED,
 		PARTYMODE,
+	}
+
+	@ConfigItem(
+			keyName = "theme",
+			name = "Theme",
+			description = "The color theme used for highlighting things.",
+			position = 0
+	)
+	default Theme theme()
+	{
+		return Theme.RAINBOW;
 	}
 
 	@ConfigItem(
