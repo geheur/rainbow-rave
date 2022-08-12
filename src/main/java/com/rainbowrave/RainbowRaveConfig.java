@@ -236,7 +236,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default MouseTrailStyle whichMouseTrailStyle()
 	{
-		return MouseTrailStyle.ENABLED;
+		return MouseTrailStyle.NONE;
 	}
 
 }
