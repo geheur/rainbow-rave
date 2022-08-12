@@ -36,7 +36,7 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
-	enum GroundMarkerStyle {
+	enum GroundMarkerColorMode {
 		WAVES,
 		RANDOM,
 		COLOR_SYNC
@@ -126,15 +126,18 @@ public interface RainbowRaveConfig extends Config
 		return true;
 	}
 
+	String OLD_TILE_COLOR_WAVES_KEY = "smoothWaves";
+	String GROUND_MARKER_COLOR_MODE_KEY = "groundMarkerColorMode";
+
 	@ConfigItem(
-			keyName = "groundMarkerStyle",
-			name = "Tile Color Mode",
-			description = "Choose the way marked tiles decide their color.",
-			position = 6
+		keyName = GROUND_MARKER_COLOR_MODE_KEY,
+		name = "Tile Color Mode",
+		description = "\"waves\" makes tile color smooth between adjacent tiles, and \"color sync\" makes tiles with the same color in ground markers share the same color.",
+		position = 6
 	)
-	default GroundMarkerStyle whichGroundMarkerStyle()
+	default GroundMarkerColorMode groundMarkerColorMode()
 	{
-		return GroundMarkerStyle.RANDOM;
+		return GroundMarkerColorMode.RANDOM;
 	}
 
 	@ConfigItem(

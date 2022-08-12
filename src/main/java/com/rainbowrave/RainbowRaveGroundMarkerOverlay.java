@@ -96,7 +96,7 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 
 				// This formula does not have a solid concept behind it, I just tried random stuff.
 				int hashCode;
-				switch (rainbowRaveConfig.whichGroundMarkerStyle()) {
+				switch (rainbowRaveConfig.groundMarkerColorMode()) {
 					case WAVES:
 						hashCode = (point.getWorldPoint().getX() + point.getWorldPoint().getY()) * 5;
 						break;
