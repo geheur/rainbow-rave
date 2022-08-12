@@ -53,7 +53,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
     // Function the get the rainbow color for a particular point
     private Color getColor(int position) {
         // TODO hook curve size multiplier into config
-        float currentPercent = (float) position / plugin.getTrailLength();
+        float currentPercent = 0;
         switch (rainbowRaveConfig.whichMouseTrailStyle()) {
             case SYNCED:
                 return rainbowRavePlugin.getColor(0);
@@ -62,6 +62,13 @@ class RainbowRaveMouseTrailOverlay extends Overlay
                 // and allowing party mode to have a similar effect regardless of the trail length
                 float partyScale = (plugin.getTrail().size() / 50f) * 3;
                 currentPercent = position / (plugin.getTrailLength() / partyScale);
+                break;
+            case ENABLED:
+                // Calculate how far into the trail this point position is
+                currentPercent = (float) position / plugin.getTrailLength();
+                // Scale the percent by 7/8 to stop colors from repeating on the ends of the trail
+                currentPercent *= (7f/8f);
+                break;
         }
         return Color.getHSBColor(currentPercent, 1.0f, 1.0f);
     }
