@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
@@ -198,10 +199,8 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 				continue;
 			}
 
-			final Color highlighted = plugin.getHighlighted(new NamedQuantity(item), item.getGePrice(), item.getHaPrice());
-			final Color hidden = plugin.getHidden(new NamedQuantity(item), item.getGePrice(), item.getHaPrice(), item.isTradeable());
-
-//			System.out.println(plugin.isHotKeyPressed());
+			final Optional<Color> highlighted = plugin.getHighlighted(new NamedQuantity(item), item.getGePrice(), item.getHaPrice());
+			final Optional<Color> hidden = plugin.getHidden(new NamedQuantity(item), item.getGePrice(), item.getHaPrice(), item.isTradeable());
 			if (highlighted == null && !plugin.isHotKeyPressed())
 			{
 				// Do not display hidden items
@@ -217,12 +216,15 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 				}
 			}
 
-			final Color color = plugin.getItemColor(highlighted, hidden);
-			if (color.equals(Color.BLACK)) { // gross, but easy.
+			final Optional<Color> groundItemColor = plugin.getItemColor(highlighted, hidden, new NamedQuantity(item));
+
+			if (groundItemColor == null) continue;
+			if (!groundItemColor.isPresent()) {
 				if (!plugin.isHotKeyPressed()) offsetMap.compute(item.getLocation(), (k, v) -> v != null ? v + 1 : 0);
 
 				continue;
 			}
+			Color color = groundItemColor.get();
 
 			if (config.highlightTiles())
 			{
