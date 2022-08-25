@@ -70,7 +70,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
                 currentPercent *= (7f/8f);
                 break;
         }
-        return Color.getHSBColor(currentPercent, 1.0f, 1.0f);
+        return rainbowRaveConfig.theme().getColor(currentPercent);
     }
 
     @Override

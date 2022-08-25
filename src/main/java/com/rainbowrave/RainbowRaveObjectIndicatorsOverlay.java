@@ -53,15 +53,17 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 	private final RainbowRaveObjectIndicatorsPlugin plugin;
 	private final RainbowRaveConfig rainbowRaveConfig;
 	private final ModelOutlineRenderer modelOutlineRenderer;
+	private final RainbowRavePlugin rainbowRavePlugin;
 
 	public RainbowRaveObjectIndicatorsOverlay(Client client, ObjectIndicatorsConfig config, RainbowRaveObjectIndicatorsPlugin plugin,
-											   ModelOutlineRenderer modelOutlineRenderer, RainbowRaveConfig rainbowRaveConfig)
+											   ModelOutlineRenderer modelOutlineRenderer, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig)
 	{
 		this.client = client;
 		this.config = config;
 		this.plugin = plugin;
 		this.modelOutlineRenderer = modelOutlineRenderer;
 		this.rainbowRaveConfig = rainbowRaveConfig;
+		this.rainbowRavePlugin = rainbowRavePlugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setPriority(OverlayPriority.LOW);
 		setLayer(OverlayLayer.ABOVE_SCENE);
@@ -74,7 +76,7 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 		for (ColorTileObject colorTileObject : plugin.getObjects())
 		{
 			TileObject object = colorTileObject.getTileObject();
-			Color color = RainbowRavePlugin.getColor(colorTileObject.hashCode(), client.getGameCycle(), rainbowRaveConfig.syncColor(), rainbowRaveConfig.colorSpeed());
+			Color color = rainbowRavePlugin.getColor(colorTileObject.hashCode());
 
 			if (object.getPlane() != client.getPlane())
 			{

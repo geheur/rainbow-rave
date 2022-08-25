@@ -152,7 +152,7 @@ public class RainbowRavePlugin extends Plugin
 		eventBus.register(rainbowRaveGroundMarkerPlugin);
 
 		if (rainbowRaveObjectIndicatorsOverlay == null) {
-			rainbowRaveObjectIndicatorsOverlay = new RainbowRaveObjectIndicatorsOverlay(client, objectIndicatorsConfig, rainbowRaveObjectIndicatorsPlugin, modelOutlineRenderer, config);
+			rainbowRaveObjectIndicatorsOverlay = new RainbowRaveObjectIndicatorsOverlay(client, objectIndicatorsConfig, rainbowRaveObjectIndicatorsPlugin, modelOutlineRenderer, this, config);
 		}
 		rainbowRaveObjectIndicatorsPlugin.startUp();
 		overlayManager.add(rainbowRaveObjectIndicatorsOverlay);
@@ -184,6 +184,19 @@ public class RainbowRavePlugin extends Plugin
 		overlayManager.add(rainbowRaveMouseTrailOverlay);
 		rainbowRaveMouseTrailPlugin.startUp();
 		eventBus.register(rainbowRaveMouseTrailPlugin);
+
+		migrateConfig();
+	}
+
+	private void migrateConfig()
+	{
+		String previousSmoothWaves = configManager.getConfiguration(GROUP, RainbowRaveConfig.OLD_TILE_COLOR_WAVES_KEY);
+		if (previousSmoothWaves != null) {
+			if (Boolean.valueOf(previousSmoothWaves)) {
+				configManager.setConfiguration(GROUP, RainbowRaveConfig.GROUND_MARKER_COLOR_MODE_KEY, RainbowRaveConfig.GroundMarkerColorMode.WAVES);
+			} // else it would be "random" which is default
+			configManager.unsetConfiguration(GROUP, RainbowRaveConfig.OLD_TILE_COLOR_WAVES_KEY);
+		}
 	}
 
 	@Override
@@ -267,14 +280,14 @@ public class RainbowRavePlugin extends Plugin
 
 	public Color getColor(int hashCode)
 	{
-		return RainbowRavePlugin.getColor(hashCode, client.getGameCycle(), config.syncColor(), config.colorSpeed());
+		return getColor(hashCode, client.getGameCycle(), config.syncColor(), config.colorSpeed());
 	}
 
-	public static Color getColor(int hashCode, int gameCycle, boolean syncColor, int colorSpeed)
+	public Color getColor(int hashCode, int gameCycle, boolean syncColor, int colorSpeed)
 	{
 		if (syncColor) hashCode = 0;
 		int clientTicks = colorSpeed / 20;
-		return Color.getHSBColor(((hashCode + gameCycle) % clientTicks) / ((float) clientTicks), 1.0f, 1.0f);
+		return config.theme().getColor(((hashCode + gameCycle) % clientTicks) / ((float) clientTicks));
 	}
 
 	private static final List<Integer> scytheTrailIds = Arrays.asList(478, 506, 1172);

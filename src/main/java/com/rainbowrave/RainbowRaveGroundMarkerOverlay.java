@@ -96,13 +96,22 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 
 				// This formula does not have a solid concept behind it, I just tried random stuff.
 				int hashCode;
-				if (rainbowRaveConfig.smoothWaves()) {
-					hashCode = (point.getWorldPoint().getX() + point.getWorldPoint().getY()) * 5;
-				} else {
-					random.setSeed((point.getWorldPoint().getX() << 16) + point.getWorldPoint().getY());
-					hashCode = random.nextInt(1000);
+				switch (rainbowRaveConfig.groundMarkerColorMode()) {
+					case WAVES:
+						hashCode = (point.getWorldPoint().getX() + point.getWorldPoint().getY()) * 5;
+						break;
+					case COLOR_SYNC:
+						if (point.getColor() != null) {
+							random.setSeed(point.getColor().getRGB());
+							hashCode = random.nextInt(1000);
+							break;
+						}
+					case RANDOM:
+					default:
+						random.setSeed(((long) point.getWorldPoint().getX() << 16) + point.getWorldPoint().getY());
+						hashCode = random.nextInt(1000);
 				}
-				Color tileColor = (rainbowRaveConfig.syncColor() && !rainbowRaveConfig.smoothWaves()) ? rainbowRavePlugin.getColor(0) : Color.getHSBColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f, 1.0f, 1.0f);
+				Color tileColor = rainbowRaveConfig.syncColor() ? rainbowRavePlugin.getColor(0) : rainbowRaveConfig.theme().getColor(((hashCode + (client.getGameCycle() * (6000f / rainbowRaveConfig.colorSpeed()))) % 300) / 300f);
 				drawTile(graphics, worldPoint, tileColor, point.getLabel(), stroke, rainbowRaveConfig.fillTiles());
 			}
 		} catch (ConcurrentModificationException e) {

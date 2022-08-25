@@ -31,6 +31,10 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
+import static com.rainbowrave.RainbowRaveConfig.GroundItemsToColor.HIGH;
+import static com.rainbowrave.RainbowRaveConfig.GroundItemsToColor.INSANE;
+import static com.rainbowrave.RainbowRaveConfig.GroundItemsToColor.LOW;
+import static com.rainbowrave.RainbowRaveConfig.GroundItemsToColor.MEDIUM;
 import java.awt.Color;
 import java.awt.Rectangle;
 import static java.lang.Boolean.TRUE;
@@ -38,6 +42,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -76,7 +81,6 @@ import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.Text;
 
 public class RainbowRaveGroundItemsPlugin
@@ -93,16 +97,6 @@ public class RainbowRaveGroundItemsPlugin
 	static final int MAX_QUANTITY = 65535;
 	// ItemID for coins
 	private static final int COINS = ItemID.COINS_995;
-	// Ground item menu options
-	private static final int FIRST_OPTION = MenuAction.GROUND_ITEM_FIRST_OPTION.getId();
-	private static final int SECOND_OPTION = MenuAction.GROUND_ITEM_SECOND_OPTION.getId();
-	private static final int THIRD_OPTION = MenuAction.GROUND_ITEM_THIRD_OPTION.getId(); // this is Take
-	private static final int FOURTH_OPTION = MenuAction.GROUND_ITEM_FOURTH_OPTION.getId();
-	private static final int FIFTH_OPTION = MenuAction.GROUND_ITEM_FIFTH_OPTION.getId();
-	private static final int EXAMINE_ITEM = MenuAction.EXAMINE_ITEM_GROUND.getId();
-	private static final int CAST_ON_ITEM = MenuAction.WIDGET_TARGET_ON_GROUND_ITEM.getId();
-
-	private static final String TELEGRAB_TEXT = ColorUtil.wrapWithColorTag("Telekinetic Grab", Color.GREEN) + ColorUtil.prependColorTag(" -> ", Color.WHITE);
 
 	@Getter(AccessLevel.PACKAGE)
 	@Setter(AccessLevel.PACKAGE)
@@ -391,104 +385,11 @@ public class RainbowRaveGroundItemsPlugin
 		priceChecks = priceCheckBuilder.build();
 	}
 
-//	@Subscribe
-//	public void onMenuEntryAdded(MenuEntryAdded event)
-//	{
-//		if (config.itemHighlightMode() == ItemHighlightMode.MENU || config.itemHighlightMode() == ItemHighlightMode.BOTH)
-//		{
-//			final boolean telegrabEntry = event.getOption().equals("Cast") && event.getTarget().startsWith(TELEGRAB_TEXT) && event.getType() == CAST_ON_ITEM;
-//			if (!(event.getOption().equals("Take") && event.getType() == THIRD_OPTION) && !telegrabEntry)
-//			{
-//				return;
-//			}
-//
-//			final int itemId = event.getIdentifier();
-//			final int sceneX = event.getActionParam0();
-//			final int sceneY = event.getActionParam1();
-//
-//			MenuEntry[] menuEntries = client.getMenuEntries();
-//			MenuEntry lastEntry = menuEntries[menuEntries.length - 1];
-//
-//			final WorldPoint worldPoint = WorldPoint.fromScene(client, sceneX, sceneY, client.getPlane());
-//			GroundItem groundItem = collectedGroundItems.get(worldPoint, itemId);
-//			int quantity = groundItem.getQuantity();
-//
-//			final int gePrice = groundItem.getGePrice();
-//			final int haPrice = groundItem.getHaPrice();
-//			final Color hidden = getHidden(new NamedQuantity(groundItem.getName(), quantity), gePrice, haPrice, groundItem.isTradeable());
-//			final Color highlighted = getHighlighted(new NamedQuantity(groundItem.getName(), quantity), gePrice, haPrice);
-//			final Color color = getItemColor(highlighted, hidden);
-//			final boolean canBeRecolored = highlighted != null || (hidden != null && config.recolorMenuHiddenItems());
-//
-//			if (color != null && canBeRecolored && !color.equals(config.defaultColor()))
-//			{
-//				final MenuHighlightMode mode = config.menuHighlightMode();
-//
-//				if (mode == BOTH || mode == OPTION)
-//				{
-//					final String optionText = telegrabEntry ? "Cast" : "Take";
-//					lastEntry.setOption(ColorUtil.prependColorTag(optionText, color));
-//				}
-//
-//				if (mode == BOTH || mode == NAME)
-//				{
-//					String target = lastEntry.getTarget();
-//
-//					if (telegrabEntry)
-//					{
-//						target = target.substring(TELEGRAB_TEXT.length());
-//					}
-//
-//					target = ColorUtil.prependColorTag(target.substring(target.indexOf('>') + 1), color);
-//
-//					if (telegrabEntry)
-//					{
-//						target = TELEGRAB_TEXT + target;
-//					}
-//
-//					lastEntry.setTarget(target);
-//				}
-//			}
-//
-//			if (config.showMenuItemQuantities() && groundItem.isStackable() && quantity > 1)
-//			{
-//				lastEntry.setTarget(lastEntry.getTarget() + " (" + quantity + ")");
-//			}
-//
-//			client.setMenuEntries(menuEntries);
-//		}
-//	}
-//
-//	void updateList(String item, boolean hiddenList)
-//	{
-//		final List<String> hiddenItemSet = new ArrayList<>(hiddenItemList);
-//		final List<String> highlightedItemSet = new ArrayList<>(highlightedItemsList);
-//
-//		if (hiddenList)
-//		{
-//			highlightedItemSet.removeIf(item::equalsIgnoreCase);
-//		}
-//		else
-//		{
-//			hiddenItemSet.removeIf(item::equalsIgnoreCase);
-//		}
-//
-//		final List<String> items = hiddenList ? hiddenItemSet : highlightedItemSet;
-//
-//		if (!items.removeIf(item::equalsIgnoreCase))
-//		{
-//			items.add(item);
-//		}
-//
-//		config.setHiddenItems(Text.toCSV(hiddenItemSet));
-//		config.setHighlightedItem(Text.toCSV(highlightedItemSet));
-//	}
-//
-	Color getHighlighted(NamedQuantity item, int gePrice, int haPrice)
+	Optional<Color> getHighlighted(NamedQuantity item, int gePrice, int haPrice)
 	{
 		if (TRUE.equals(highlightedItems.getUnchecked(item)))
 		{
-			return rainbowRaveConfig.colorHighlightedGroundItems() ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+			return rainbowRaveConfig.colorHighlightedGroundItems() ? Optional.of(rainbowRavePlugin.getColor(item.getName().hashCode())) : Optional.empty();
 		}
 
 		// Explicit hide takes priority over implicit highlight
@@ -500,28 +401,33 @@ public class RainbowRaveGroundItemsPlugin
 		final int price = getValueByMode(gePrice, haPrice);
 		if (price > config.insaneValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.INSANE) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+			return colorForTier(INSANE, item);
 		}
 
 		if (price > config.highValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIGH) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+			return colorForTier(HIGH, item);
 		}
 
 		if (price > config.mediumValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.MEDIUM) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+			return colorForTier(MEDIUM, item);
 		}
 
 		if (price > config.lowValuePrice())
 		{
-			return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.LOW) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+			return colorForTier(LOW, item);
 		}
 
-		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.REGULAR) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK;
+		return null;
 	}
 
-	Color getHidden(NamedQuantity item, int gePrice, int haPrice, boolean isTradeable)
+	private Optional<Color> colorForTier(RainbowRaveConfig.GroundItemsToColor tier, NamedQuantity item)
+	{
+		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(tier) >= 0 ? Optional.of(rainbowRavePlugin.getColor(item.getName().hashCode())) : Optional.empty();
+	}
+
+	Optional<Color> getHidden(NamedQuantity item, int gePrice, int haPrice, boolean isTradeable)
 	{
 		final boolean isExplicitHidden = TRUE.equals(hiddenItems.getUnchecked(item));
 		final boolean isExplicitHighlight = TRUE.equals(highlightedItems.getUnchecked(item));
@@ -531,11 +437,11 @@ public class RainbowRaveGroundItemsPlugin
 
 		// Explicit highlight takes priority over implicit hide
 		return isExplicitHidden || (!isExplicitHighlight && canBeHidden && underGe && underHa)
-			? rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIDDEN) >= 0 ? rainbowRavePlugin.getColor(item.getName().hashCode()) : Color.BLACK
+			? rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.HIDDEN) >= 0 ? Optional.of(rainbowRavePlugin.getColor(item.getName().hashCode())) : Optional.empty()
 			: null;
 	}
 
-	Color getItemColor(Color highlighted, Color hidden)
+	Optional<Color> getItemColor(Optional<Color> highlighted, Optional<Color> hidden, NamedQuantity item)
 	{
 		if (highlighted != null)
 		{
@@ -547,7 +453,7 @@ public class RainbowRaveGroundItemsPlugin
 			return hidden;
 		}
 
-		return config.defaultColor();
+		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(RainbowRaveConfig.GroundItemsToColor.REGULAR) >= 0 ? Optional.of(rainbowRavePlugin.getColor(item.getName().hashCode())) : Optional.empty();
 	}
 
 	@Subscribe

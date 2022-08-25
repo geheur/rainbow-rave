@@ -1,7 +1,6 @@
 package com.rainbowrave;
 
 import static com.rainbowrave.RainbowRaveConfig.NpcsToHighlight.SAME;
-import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -37,11 +36,28 @@ public interface RainbowRaveConfig extends Config
 		HIDDEN
 	}
 
+	enum GroundMarkerColorMode {
+		WAVES,
+		RANDOM,
+		COLOR_SYNC
+	}
+
 	enum MouseTrailStyle {
 		NONE,
 		ENABLED,
 		SYNCED,
 		PARTYMODE,
+	}
+
+	@ConfigItem(
+			keyName = "theme",
+			name = "Theme",
+			description = "The color theme used for highlighting things.",
+			position = 0
+	)
+	default Theme theme()
+	{
+		return Theme.RAINBOW;
 	}
 
 	@ConfigItem(
@@ -110,15 +126,18 @@ public interface RainbowRaveConfig extends Config
 		return true;
 	}
 
+	String OLD_TILE_COLOR_WAVES_KEY = "smoothWaves";
+	String GROUND_MARKER_COLOR_MODE_KEY = "groundMarkerColorMode";
+
 	@ConfigItem(
-		keyName = "smoothWaves",
-		name = "Tile color waves",
-		description = "Whether the tiles should have a smooth transition from color to color between two adjacent tiles.",
+		keyName = GROUND_MARKER_COLOR_MODE_KEY,
+		name = "Tile Color Mode",
+		description = "\"waves\" makes tile color smooth between adjacent tiles, and \"color sync\" makes tiles with the same color in ground markers share the same color.",
 		position = 6
 	)
-	default boolean smoothWaves()
+	default GroundMarkerColorMode groundMarkerColorMode()
 	{
-		return false;
+		return GroundMarkerColorMode.RANDOM;
 	}
 
 	@ConfigItem(
@@ -217,7 +236,7 @@ public interface RainbowRaveConfig extends Config
 	)
 	default MouseTrailStyle whichMouseTrailStyle()
 	{
-		return MouseTrailStyle.ENABLED;
+		return MouseTrailStyle.NONE;
 	}
 
 	@ConfigItem(
