@@ -58,19 +58,17 @@ class RainbowRaveMouseTrailOverlay extends Overlay
             case SYNCED:
                 return rainbowRavePlugin.getColor(0);
             case PARTYMODE:
-                // This allows the color cycle to repeat 3 times for every 50 curves
-                // and allowing party mode to have a similar effect regardless of the trail length
+                // This lets the color cycle to repeat 3 times for every 50 curves
+                // and allows party mode to have a similar effect regardless of the current trail length
                 float partyScale = (plugin.getTrail().size() / 50f) * 3;
                 currentPercent = position / (plugin.getTrailLength() / partyScale);
                 break;
             case ENABLED:
                 // Calculate how far into the trail this point position is
                 currentPercent = (float) position / plugin.getTrailLength();
-                // Scale the percent by 7/8 to stop colors from repeating on the ends of the trail
-                currentPercent *= (7f/8f);
                 break;
         }
-        return rainbowRaveConfig.theme().getColor(currentPercent);
+        return rainbowRaveConfig.theme().getMouseTrailColor(currentPercent);
     }
 
     @Override

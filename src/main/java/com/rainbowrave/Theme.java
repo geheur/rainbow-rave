@@ -8,10 +8,11 @@ import java.util.List;
 public enum Theme
 {
     RAINBOW,
-    TRANS(new Color(91, 206, 250),
-            new Color(245, 169, 184),
-            new Color(255, 255, 255),
-            new Color(245, 169, 184)
+    TRANS(
+		new Color(91, 206, 250),
+		new Color(245, 169, 184),
+		new Color(255, 255, 255),
+		new Color(245, 169, 184)
     ),
 	ENBY(
 		new Color(255, 255, 255),
@@ -59,13 +60,21 @@ public enum Theme
 	);
 
 	private final List<PerceptualGradient> gradients;
+	private final float mouseTrailPercent;
 
 	Theme()
 	{
-		gradients = new ArrayList<>();
+		// Only the RAINBOW theme uses this constructor
+		// Set the mouse trail percent to 5/6 to stop colors from repeating on the ends of the trail
+		this(5/6f);
 	}
 
 	Theme(Color... colors) {
+		this(1, colors);
+    }
+
+	Theme(float mouseTrailPercent, Color... colors) {
+		this.mouseTrailPercent = mouseTrailPercent;
 		gradients = new ArrayList<>();
 		for (int i=0; i<colors.length; i++) {
 			Color startColor = colors[i];
@@ -89,4 +98,9 @@ public enum Theme
         float relativeRatio = (ratio%increment)/increment;
         return gradient.getColorMix(relativeRatio);
     }
+
+	public Color getMouseTrailColor(float ratio)
+	{
+		return getColor(ratio * mouseTrailPercent);
+	}
 }
