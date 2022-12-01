@@ -28,7 +28,6 @@ package com.rainbowrave;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Provides;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -232,10 +231,10 @@ public class RainbowRaveGroundMarkerPlugin
 		if (event.getGroup().equals(BRUSH_CONFIG_GROUP) && event.getKey().startsWith(REGION_PREFIX)) {
 			loadPoints();
 		}
-		if (event.getGroup().equals(GroundMarkerConfig.GROUND_MARKER_CONFIG_GROUP)
-			&& (event.getKey().equals(GroundMarkerConfig.SHOW_IMPORT_EXPORT_KEY_NAME)
-				|| event.getKey().equals(GroundMarkerConfig.SHOW_CLEAR_KEY_NAME)))
-		{
+//		if (event.getGroup().equals(GroundMarkerConfig.GROUND_MARKER_CONFIG_GROUP)
+//			&& (event.getKey().equals(GroundMarkerConfig.SHOW_IMPORT_EXPORT_KEY_NAME)
+//				|| event.getKey().equals(GroundMarkerConfig.SHOW_CLEAR_KEY_NAME)))
+//		{
 			// Maintain consistent menu option order by removing everything then adding according to config
 //			sharingManager.removeMenuOptions();
 //
@@ -247,7 +246,7 @@ public class RainbowRaveGroundMarkerPlugin
 //			{
 //				sharingManager.addClearMenuOption();
 //			}
-		}
+//		}
 	}
 
 	private void markTile(LocalPoint localPoint)
@@ -260,7 +259,7 @@ public class RainbowRaveGroundMarkerPlugin
 		WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, localPoint);
 
 		int regionId = worldPoint.getRegionID();
-		GroundMarkerPoint point = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), config.markerColor(), null);
+		GroundMarkerPoint point = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), worldPoint.getPlane(), config.markerColor(), null);
 		log.debug("Updating point: {} - {}", point, worldPoint);
 
 		List<GroundMarkerPoint> groundMarkerPoints = new ArrayList<>(getPoints(regionId));
@@ -284,7 +283,7 @@ public class RainbowRaveGroundMarkerPlugin
 		WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, localPoint);
 		final int regionId = worldPoint.getRegionID();
 
-		GroundMarkerPoint searchPoint = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), null, null);
+		GroundMarkerPoint searchPoint = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), worldPoint.getPlane(), null, null);
 		Collection<GroundMarkerPoint> points = getPoints(regionId);
 		GroundMarkerPoint existing = points.stream()
 			.filter(p -> p.equals(searchPoint))
@@ -300,7 +299,7 @@ public class RainbowRaveGroundMarkerPlugin
 			{
 				input = Strings.emptyToNull(input);
 
-				GroundMarkerPoint newPoint = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), existing.getColor(), input);
+				GroundMarkerPoint newPoint = new GroundMarkerPoint(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), worldPoint.getPlane(), existing.getColor(), input);
 				points.remove(searchPoint);
 				points.add(newPoint);
 //				savePoints(regionId, points);
