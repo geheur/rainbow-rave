@@ -26,7 +26,8 @@
 package com.rainbowrave;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.MoreObjects;
+import java.awt.Color;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +47,7 @@ import net.runelite.api.GraphicID;
 import net.runelite.api.GraphicsObject;
 import net.runelite.api.MenuAction;
 import net.runelite.api.NPC;
+import net.runelite.api.NPCComposition;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -55,8 +57,10 @@ import net.runelite.api.events.NpcChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.game.NpcUtil;
 import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -75,21 +79,19 @@ public class RainbowRaveNpcIndicatorsPlugin
 	private static final String TAG_ALL = "Tag-All";
 	private static final String UNTAG_ALL = "Un-tag-All";
 
-	private static final Set<MenuAction> NPC_MENU_ACTIONS = ImmutableSet.of(MenuAction.NPC_FIRST_OPTION, MenuAction.NPC_SECOND_OPTION,
-		MenuAction.NPC_THIRD_OPTION, MenuAction.NPC_FOURTH_OPTION, MenuAction.NPC_FIFTH_OPTION, MenuAction.WIDGET_TARGET_ON_NPC,
-		MenuAction.ITEM_USE_ON_NPC);
+	private static final String STYLE_HULL = "hull";
+	private static final String STYLE_TILE = "tile";
+	private static final String STYLE_TRUE_TILE = "truetile";
+	private static final String STYLE_SW_TILE = "swtile";
+	private static final String STYLE_SW_TRUE_TILE = "swtruetile";
+	private static final String STYLE_OUTLINE = "outline";
 
-	@Inject
-	private Client client;
-
-	@Inject
-	private NpcIndicatorsConfig config;
-
-	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
-	private ClientThread clientThread;
+	@Inject private Client client;
+	@Inject private NpcIndicatorsConfig config;
+	@Inject private OverlayManager overlayManager;
+	@Inject private ClientThread clientThread;
+	@Inject private NpcUtil npcUtil;
+	@Inject private ConfigManager configManager;
 
 	/**
 	 * NPCs to highlight
@@ -196,7 +198,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
-		if (!configChanged.getGroup().equals("npcindicators"))
+		if (!configChanged.getGroup().equals(NpcIndicatorsConfig.GROUP))
 		{
 			return;
 		}
@@ -574,7 +576,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 					final WorldPoint possibleOtherNpcLocation = getWorldLocationBehind(npc);
 
 					mn.getPossibleRespawnLocations().removeIf(x ->
-						x.distanceTo(npcLocation) != 0 && x.distanceTo(possibleOtherNpcLocation) != 0);
+						!x.equals(npcLocation) && !x.equals(possibleOtherNpcLocation));
 
 					if (mn.getPossibleRespawnLocations().isEmpty())
 					{
@@ -592,20 +594,93 @@ public class RainbowRaveNpcIndicatorsPlugin
 
 	public HighlightedNpc highlightedNpc(NPC npc)
 	{
+		final int npcId = npc.getId();
+
+		final String style = getNpcTagStyle(npcId);
+		final boolean hull, tile, trueTile, swTile, swTrueTile, outline;
+		// if set, value from config overrides global config
+		if (style != null)
+		{
+			hull = STYLE_HULL.equals(style);
+			tile = STYLE_TILE.equals(style);
+			trueTile = STYLE_TRUE_TILE.equals(style);
+			swTile = STYLE_SW_TILE.equals(style);
+			swTrueTile = STYLE_SW_TRUE_TILE.equals(style);
+			outline = STYLE_OUTLINE.equals(style);
+		}
+		else
+		{
+			hull = config.highlightHull();
+			tile = config.highlightTile();
+			trueTile = config.highlightTrueTile();
+			swTile = config.highlightSouthWestTile();
+			swTrueTile = config.highlightSouthWestTrueTile();
+			outline = config.highlightOutline();
+		}
+
 		return HighlightedNpc.builder()
 			.npc(npc)
-			.highlightColor(config.highlightColor())
+			.highlightColor(MoreObjects.firstNonNull(getNpcHighlightColor(npcId), config.highlightColor()))
 			.fillColor(config.fillColor())
-			.hull(config.highlightHull())
-			.tile(config.highlightTile())
-			.swTile(config.highlightSouthWestTile())
-			.outline(config.highlightOutline())
+			.hull(hull)
+			.tile(tile)
+			.trueTile(trueTile)
+			.swTile(swTile)
+			.swTrueTile(swTrueTile)
+			.outline(outline)
 			.name(config.drawNames())
 			.nameOnMinimap(config.drawMinimapNames())
 			.borderWidth((float) config.borderWidth())
 			.outlineFeather(config.outlineFeather())
-			.render(n -> !n.isDead() || !config.ignoreDeadNpcs())
+			.render(this::render)
 			.build();
+	}
+
+	private boolean render(NPC n)
+	{
+		if (npcUtil.isDying(n) && config.ignoreDeadNpcs())
+		{
+			return false;
+		}
+
+		final NPCComposition c = n.getTransformedComposition();
+		if (c != null && c.isFollower() && config.ignorePets())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	private Color getNpcHighlightColor(int npcId)
+	{
+		return configManager.getConfiguration(NpcIndicatorsConfig.GROUP, "highlightcolor_" + npcId, Color.class);
+	}
+
+	private String getNpcTagStyle(int npcId)
+	{
+		return configManager.getConfiguration(NpcIndicatorsConfig.GROUP, "tagstyle_" + npcId);
+	}
+
+	/**
+	 * get some of the in-use colors from nearby npcs to prepopulate the menu
+	 */
+	private List<Color> getUsedColors()
+	{
+		List<Color> colors = new ArrayList<>();
+		for (NPC npc : client.getNpcs())
+		{
+			Color c = getNpcHighlightColor(npc.getId());
+			if (c != null && !colors.contains(c))
+			{
+				colors.add(c);
+				if (colors.size() >= 5)
+				{
+					break;
+				}
+			}
+		}
+		return colors;
 	}
 
 	public void registerHighlighter(Function<NPC, HighlightedNpc> p)

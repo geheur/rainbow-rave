@@ -111,6 +111,9 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			NPC npc = (NPC) Proxy.newProxyInstance(NPC.class.getClassLoader(),
 				new Class[]{NPC.class},
 				(a, b, c) -> {
+					if (b.getName().equals("getId")) {
+						return 100000; // no npc ids go this high, right?
+					}
 					throw new IllegalStateException();
 				});
 			if (rainbowRaveConfig.highlightSelf())
@@ -210,6 +213,20 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			renderPoly(graphics, borderColor, fillColor, tilePoly);
 		}
 
+		if (highlightedNpc.isTrueTile())
+		{
+			LocalPoint lp = LocalPoint.fromWorld(client, actor.getWorldLocation()); // centered on sw tile
+			if (lp != null)
+			{
+				int size = npcComposition == null ? 1 : npcComposition.getSize();
+				final LocalPoint centerLp = new LocalPoint(
+					lp.getX() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2,
+					lp.getY() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2);
+				Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, centerLp, size);
+				renderPoly(graphics, borderColor, fillColor, tilePoly);
+			}
+		}
+
 		if (highlightedNpc.isSwTile())
 		{
 			int size = npcComposition == null ? 1 : npcComposition.getSize();
@@ -219,8 +236,17 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			int y = lp.getY() - ((size - 1) * Perspective.LOCAL_TILE_SIZE / 2);
 
 			Polygon southWestTilePoly = Perspective.getCanvasTilePoly(client, new LocalPoint(x, y));
-
 			renderPoly(graphics, borderColor, fillColor, southWestTilePoly);
+		}
+
+		if (highlightedNpc.isSwTrueTile())
+		{
+			LocalPoint lp = LocalPoint.fromWorld(client, actor.getWorldLocation());
+			if (lp != null)
+			{
+				Polygon tilePoly = Perspective.getCanvasTilePoly(client, lp);
+				renderPoly(graphics, borderColor, fillColor, tilePoly);
+			}
 		}
 
 		if (highlightedNpc.isOutline())
