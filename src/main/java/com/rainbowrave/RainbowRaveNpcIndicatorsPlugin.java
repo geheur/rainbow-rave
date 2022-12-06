@@ -662,27 +662,6 @@ public class RainbowRaveNpcIndicatorsPlugin
 		return configManager.getConfiguration(NpcIndicatorsConfig.GROUP, "tagstyle_" + npcId);
 	}
 
-	/**
-	 * get some of the in-use colors from nearby npcs to prepopulate the menu
-	 */
-	private List<Color> getUsedColors()
-	{
-		List<Color> colors = new ArrayList<>();
-		for (NPC npc : client.getNpcs())
-		{
-			Color c = getNpcHighlightColor(npc.getId());
-			if (c != null && !colors.contains(c))
-			{
-				colors.add(c);
-				if (colors.size() >= 5)
-				{
-					break;
-				}
-			}
-		}
-		return colors;
-	}
-
 	public void registerHighlighter(Function<NPC, HighlightedNpc> p)
 	{
 		higlightPredicates.add(p);
