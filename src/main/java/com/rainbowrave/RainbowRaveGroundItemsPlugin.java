@@ -69,6 +69,7 @@ import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemQuantityChanged;
 import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
@@ -481,28 +482,16 @@ public class RainbowRaveGroundItemsPlugin
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked)
 	{
-		if (menuOptionClicked.getMenuAction() == MenuAction.ITEM_FIFTH_OPTION)
+		if (menuOptionClicked.isItemOp() && menuOptionClicked.getMenuOption().equals("Drop"))
 		{
-			int itemId = menuOptionClicked.getId();
+			int itemId = menuOptionClicked.getItemId();
 			// Keep a queue of recently dropped items to better detect
 			// item spawns that are drops
 			droppedItemQueue.add(itemId);
 		}
-		else if (menuOptionClicked.getMenuAction() == MenuAction.ITEM_USE_ON_GAME_OBJECT)
+		else if (menuOptionClicked.getMenuAction() == MenuAction.WIDGET_TARGET_ON_GAME_OBJECT && client.getSelectedWidget().getId() == WidgetInfo.INVENTORY.getId())
 		{
-			final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
-			if (inventory == null)
-			{
-				return;
-			}
-
-			final Item clickedItem = inventory.getItem(client.getSelectedItemIndex());
-			if (clickedItem == null)
-			{
-				return;
-			}
-
-			lastUsedItem = clickedItem.getId();
+			lastUsedItem = client.getSelectedWidget().getItemId();
 		}
 	}
 
