@@ -25,6 +25,7 @@
 package com.rainbowrave;
 
 import com.google.inject.Provides;
+import com.rainbowrave.RainbowRaveNpcIndicatorsPlugin.HighlightedNpc;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +44,6 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;

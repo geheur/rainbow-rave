@@ -25,13 +25,13 @@
  */
 package com.rainbowrave;
 
+import com.rainbowrave.RainbowRaveNpcIndicatorsPlugin.HighlightedNpc;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
-import java.lang.reflect.Proxy;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Instant;
@@ -46,7 +46,6 @@ import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -108,24 +107,16 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 		if (rainbowRaveConfig.highlightSelf() || rainbowRaveConfig.highlightOthers())
 		{
 			// The NPC here is never used, but HighlightedNpc requires it to be non-null.
-			NPC npc = (NPC) Proxy.newProxyInstance(NPC.class.getClassLoader(),
-				new Class[]{NPC.class},
-				(a, b, c) -> {
-					if (b.getName().equals("getId")) {
-						return 100000; // no npc ids go this high, right?
-					}
-					throw new IllegalStateException();
-				});
 			if (rainbowRaveConfig.highlightSelf())
 			{
-				renderNpcOverlay(graphics, plugin.highlightedNpc(npc), client.getLocalPlayer());
+				renderNpcOverlay(graphics, plugin.highlightedPlayer(), client.getLocalPlayer());
 			}
 			if (rainbowRaveConfig.highlightOthers())
 			{
 				for (Player player : client.getPlayers())
 				{
 					if (player != client.getLocalPlayer())
-						renderNpcOverlay(graphics, plugin.highlightedNpc(npc), player);
+						renderNpcOverlay(graphics, plugin.highlightedPlayer(), player);
 				}
 			}
 		}

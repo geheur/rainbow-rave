@@ -37,9 +37,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.inject.Inject;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -61,7 +65,6 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.NpcUtil;
-import net.runelite.client.game.npcoverlay.HighlightedNpc;
 import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
@@ -590,6 +593,48 @@ public class RainbowRaveNpcIndicatorsPlugin
 		spawnedNpcsThisTick.clear();
 		despawnedNpcsThisTick.clear();
 		teleportGraphicsObjectSpawnedThisTick.clear();
+	}
+
+	@Value
+	@Builder
+	public static class HighlightedNpc
+	{
+		NPC npc;
+		@NonNull
+		Color highlightColor;
+		@Builder.Default
+		Color fillColor = new Color(0, 0, 0, 50);
+		boolean hull;
+		boolean tile;
+		boolean trueTile;
+		boolean swTile;
+		boolean swTrueTile;
+		boolean outline;
+		boolean name;
+		boolean nameOnMinimap;
+		@Builder.Default
+		float borderWidth = 2.0f;
+		int outlineFeather;
+		Predicate<NPC> render;
+	}
+
+	public HighlightedNpc highlightedPlayer()
+	{
+		return HighlightedNpc.builder()
+			.highlightColor(config.highlightColor())
+			.fillColor(config.fillColor())
+			.hull(config.highlightHull())
+			.tile(config.highlightTile())
+			.trueTile(config.highlightTrueTile())
+			.swTile(config.highlightSouthWestTile())
+			.swTrueTile(config.highlightSouthWestTrueTile())
+			.outline(config.highlightOutline())
+			.name(config.drawNames())
+			.nameOnMinimap(config.drawMinimapNames())
+			.borderWidth((float) config.borderWidth())
+			.outlineFeather(config.outlineFeather())
+			.render(this::render)
+			.build();
 	}
 
 	public HighlightedNpc highlightedNpc(NPC npc)
