@@ -39,11 +39,15 @@ import net.runelite.client.input.MouseManager;
 @Slf4j
 public class RainbowRaveMouseTrailPlugin
 {
-    private final Deque<Curve> curve = new ArrayDeque<>();
+    private final Deque<Curve> curves = new ArrayDeque<>();
     private Point temp = null;
+    private int trailLength = 0;
 
     @Inject
     private MouseManager mouseManager;
+
+    @Inject
+    private RainbowRaveConfig config;
 
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         @Override
@@ -62,14 +66,21 @@ public class RainbowRaveMouseTrailPlugin
 
     protected void startUp()
     {
+        trailLength = 0;
         setMouseListenerEnabled(true);
     }
 
     protected void shutDown()
     {
-        curve.clear();
-
+        curves.clear();
+        trailLength = 0;
         setMouseListenerEnabled(false);
+    }
+
+    protected void restart()
+    {
+        shutDown();
+        startUp();
     }
 
     public void setMouseListenerEnabled(boolean enabled)
@@ -93,28 +104,37 @@ public class RainbowRaveMouseTrailPlugin
 
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle")) {
-            setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
+        if (!configChanged.getGroup().equals("rainbow_rave")){
+            return;
+        }
+        setMouseListenerEnabled(config.whichMouseTrailStyle() != RainbowRaveConfig.MouseTrailStyle.NONE);
+        if (configChanged.getKey().equals("mouseTrailLength")) {
+            restart();
         }
     }
 
     public void updateMousePositions(Point point) {
-            if (curve.size() < 50) {
+            if (curves.size() < config.mouseTrailLength()) {
                 if (temp != null) {
                     Curve current = new Curve(temp, point);
-                    curve.add(current);
+                    curves.add(current);
+                    trailLength += current.getCurve().size();
                 }
                 temp = point;
             }
     }
 
     public Deque<Curve> getTrail() {
-        return curve;
+        return curves;
+    }
+
+    public int getTrailLength() {
+        return trailLength;
     }
 
     public void popTrail() {
-        if(curve.size() > 0) {
-            curve.pop();
+        if(curves.size() > 0) {
+            trailLength -= curves.pop().getCurve().size();
         }
     }
 }
