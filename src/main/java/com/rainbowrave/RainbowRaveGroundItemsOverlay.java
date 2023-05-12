@@ -25,7 +25,6 @@
  */
 package com.rainbowrave;
 
-import static com.rainbowrave.RainbowRaveGroundItemsPlugin.MAX_QUANTITY;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -245,16 +244,9 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 
 			if (item.getQuantity() > 1)
 			{
-				if (item.getQuantity() >= MAX_QUANTITY)
-				{
-					itemStringBuilder.append(" (Lots!)");
-				}
-				else
-				{
-					itemStringBuilder.append(" (")
-						.append(QuantityFormatter.quantityToStackSize(item.getQuantity()))
-						.append(")");
-				}
+				itemStringBuilder.append(" (")
+					.append(QuantityFormatter.quantityToStackSize(item.getQuantity()))
+					.append(')');
 			}
 
 			if (config.priceDisplayMode() == PriceDisplayMode.BOTH)

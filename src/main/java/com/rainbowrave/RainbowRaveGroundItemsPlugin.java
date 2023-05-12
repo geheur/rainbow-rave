@@ -40,6 +40,7 @@ import java.awt.Rectangle;
 import static java.lang.Boolean.TRUE;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,12 +53,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
-import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
 import net.runelite.api.Tile;
@@ -72,6 +71,7 @@ import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.NpcLootReceived;
@@ -81,11 +81,17 @@ import net.runelite.client.game.ItemStack;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
+import net.runelite.client.plugins.grounditems.config.HighlightTier;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 
 public class RainbowRaveGroundItemsPlugin
 {
+
+	public static final String GROUND_ITEMS_CONFIG_GROUP = "grounditems";
+	public static final String SHOW_LOOTBEAM_TIER_CONFIG_KEY = "showLootbeamTier";
+	public static final String SHOW_LOOTBEAM_FOR_HIGHLIGHTED_CONFIG_KEY = "showLootbeamForHighlighted";
+
 	@Value
 	static class PriceHighlight
 	{
@@ -93,9 +99,6 @@ public class RainbowRaveGroundItemsPlugin
 		private final Color color;
 	}
 
-	// The game won't send anything higher than this value to the plugin -
-	// so we replace any item quantity higher with "Lots" instead.
-	static final int MAX_QUANTITY = 65535;
 	// ItemID for coins
 	private static final int COINS = ItemID.COINS_995;
 
@@ -161,6 +164,9 @@ public class RainbowRaveGroundItemsPlugin
 	@Inject
 	private RainbowRavePlugin rainbowRavePlugin;
 
+	@Inject
+	private ConfigManager configManager;
+
 	@Getter
 	private final Table<WorldPoint, Integer, GroundItem> collectedGroundItems = HashBasedTable.create();
 	private List<PriceHighlight> priceChecks = ImmutableList.of();
@@ -168,9 +174,12 @@ public class RainbowRaveGroundItemsPlugin
 	private LoadingCache<NamedQuantity, Boolean> hiddenItems;
 	private final Queue<Integer> droppedItemQueue = EvictingQueue.create(16); // recently dropped items
 	private int lastUsedItem;
+	final Map<WorldPoint, Lootbeam> lootbeams = new HashMap<>();
 
+//	@Override
 	protected void startUp()
 	{
+		groundItemsLootBeamChange(false, false, true);
 //		overlayManager.add(overlay);
 		mouseManager.registerMouseListener(inputListener);
 		keyManager.registerKeyListener(inputListener);
@@ -178,8 +187,10 @@ public class RainbowRaveGroundItemsPlugin
 		lastUsedItem = -1;
 	}
 
+//	@Override
 	protected void shutDown()
 	{
+		restoreGroundItemLootBeams();
 //		overlayManager.remove(overlay);
 		mouseManager.unregisterMouseListener(inputListener);
 		keyManager.unregisterKeyListener(inputListener);
@@ -190,16 +201,85 @@ public class RainbowRaveGroundItemsPlugin
 		hiddenItemList = null;
 		highlightedItemsList = null;
 		collectedGroundItems.clear();
-//		clientThread.invokeLater(this::removeAllLootbeams);
+		clientThread.invokeLater(this::removeAllLootbeams);
 	}
+
+	private boolean ignoreConfigChange = false;
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (event.getGroup().equals("grounditems"))
+		if (ignoreConfigChange) return;
+
+		if (event.getGroup().equals(GROUND_ITEMS_CONFIG_GROUP))
 		{
+			if (event.getKey().equals(SHOW_LOOTBEAM_TIER_CONFIG_KEY)) {
+				groundItemsLootBeamChange(true, false, false);
+			}
+			else if (event.getKey().equals(SHOW_LOOTBEAM_FOR_HIGHLIGHTED_CONFIG_KEY))
+			{
+				groundItemsLootBeamChange(false, true, false);
+			}
+			else
+			{
+				executor.execute(this::reset);
+			}
+		}
+		else if (event.getGroup().equals(RainbowRavePlugin.GROUP))
+		{
+			if (event.getKey().equals(RainbowRaveConfig.RECOLOR_LOOT_BEAMS_KEY))
+			{
+				if (rainbowRaveConfig.recolorLootBeams())
+				{
+					groundItemsLootBeamChange(false, false, true);
+				}
+				else
+				{
+					restoreGroundItemLootBeams();
+				}
+			}
+		}
+	}
+
+	private void groundItemsLootBeamChange(boolean tierChanged, boolean highlightedChanged, boolean turningOnRecolorLootBeams)
+	{
+		if (rainbowRaveConfig.recolorLootBeams())
+		{
+			if (!turningOnRecolorLootBeams)
+			{
+				clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
+					"Rainbow Rave: Please change loot beam settings through the rainbow rave plugin's settings, as rainbow rave needs to disable regular loot beams in order to recolor them.",
+					"", false));
+			}
+			ignoreConfigChange = true;
+			if (tierChanged || turningOnRecolorLootBeams)
+			{
+				HighlightTier highlightTier = config.showLootbeamTier();
+				rainbowRaveConfig.setGroundItemsLootbeamTier(highlightTier);
+				configManager.setConfiguration(GROUND_ITEMS_CONFIG_GROUP, SHOW_LOOTBEAM_TIER_CONFIG_KEY, HighlightTier.OFF);
+			}
+			if (highlightedChanged || turningOnRecolorLootBeams)
+			{
+				boolean showLootbeamForHighlighted = config.showLootbeamForHighlighted();
+				rainbowRaveConfig.setGroundItemsHighlightedItemsLootbeam(showLootbeamForHighlighted);
+				configManager.setConfiguration(GROUND_ITEMS_CONFIG_GROUP, SHOW_LOOTBEAM_FOR_HIGHLIGHTED_CONFIG_KEY, false);
+			}
+			ignoreConfigChange = false;
+
 			executor.execute(this::reset);
 		}
+	}
+
+	private void restoreGroundItemLootBeams()
+	{
+		HighlightTier tier = rainbowRaveConfig.getGroundItemsLootbeamTier();
+		Boolean showLootbeamForHighlighted = rainbowRaveConfig.getGroundItemsHighlightedItemsLootbeam();
+		ignoreConfigChange = true;
+		configManager.setConfiguration(GROUND_ITEMS_CONFIG_GROUP, SHOW_LOOTBEAM_TIER_CONFIG_KEY, tier);
+		configManager.setConfiguration(GROUND_ITEMS_CONFIG_GROUP, SHOW_LOOTBEAM_FOR_HIGHLIGHTED_CONFIG_KEY, showLootbeamForHighlighted);
+		ignoreConfigChange = false;
+
+		executor.execute(this::reset);
 	}
 
 	@Subscribe
@@ -208,11 +288,10 @@ public class RainbowRaveGroundItemsPlugin
 		if (event.getGameState() == GameState.LOADING)
 		{
 			collectedGroundItems.clear();
-//			lootbeams.clear();
+			lootbeams.clear();
 		}
 	}
 
-	@Subscribe
 	public void onItemSpawned(ItemSpawned itemSpawned)
 	{
 		TileItem item = itemSpawned.getItem();
@@ -229,6 +308,13 @@ public class RainbowRaveGroundItemsPlugin
 		{
 			collectedGroundItems.put(tile.getWorldLocation(), item.getId(), groundItem);
 		}
+
+//		if (!config.onlyShowLoot())
+//		{
+//			notifyHighlightedItem(groundItem);
+//		}
+
+		handleLootbeam(tile.getWorldLocation());
 	}
 
 	@Subscribe
@@ -256,7 +342,7 @@ public class RainbowRaveGroundItemsPlugin
 			groundItem.setSpawnTime(null);
 		}
 
-//		handleLootbeam(tile.getWorldLocation());
+		handleLootbeam(tile.getWorldLocation());
 	}
 
 	@Subscribe
@@ -274,7 +360,7 @@ public class RainbowRaveGroundItemsPlugin
 			groundItem.setQuantity(groundItem.getQuantity() + diff);
 		}
 
-//		handleLootbeam(tile.getWorldLocation());
+		handleLootbeam(tile.getWorldLocation());
 	}
 
 	@Subscribe
@@ -291,6 +377,11 @@ public class RainbowRaveGroundItemsPlugin
 		lootReceived(items, LootType.PVP);
 	}
 
+//	@Subscribe
+//	public void onClientTick(ClientTick event)
+//	{
+//	}
+
 	private void lootReceived(Collection<ItemStack> items, LootType lootType)
 	{
 		for (ItemStack itemStack : items)
@@ -300,8 +391,20 @@ public class RainbowRaveGroundItemsPlugin
 			if (groundItem != null)
 			{
 				groundItem.setLootType(lootType);
+
+//				if (config.onlyShowLoot())
+//				{
+//					notifyHighlightedItem(groundItem);
+//				}
 			}
 		}
+
+		// Since the loot can potentially be over multiple tiles, make sure to process lootbeams on all those tiles
+		items.stream()
+			.map(ItemStack::getLocation)
+			.map(l -> WorldPoint.fromLocal(client, l))
+			.distinct()
+			.forEach(this::handleLootbeam);
 	}
 
 	private GroundItem buildGroundItem(final Tile tile, final TileItem item)
@@ -384,7 +487,18 @@ public class RainbowRaveGroundItemsPlugin
 		}
 
 		priceChecks = priceCheckBuilder.build();
+
+		clientThread.invokeLater(this::handleLootbeams);
 	}
+
+//	@Subscribe
+//	public void onMenuEntryAdded(MenuEntryAdded event)
+//	{
+//	}
+
+//	void updateList(String item, boolean hiddenList)
+//	{
+//	}
 
 	Optional<Color> getHighlighted(NamedQuantity item, int gePrice, int haPrice)
 	{
@@ -466,6 +580,10 @@ public class RainbowRaveGroundItemsPlugin
 		}
 	}
 
+//	private void notifyHighlightedItem(net.runelite.client.plugins.grounditems.GroundItem item)
+//	{
+//	}
+
 	private int getValueByMode(int gePrice, int haPrice)
 	{
 		switch (config.valueCalculationMode())
@@ -495,102 +613,103 @@ public class RainbowRaveGroundItemsPlugin
 		}
 	}
 
-//	private void handleLootbeam(WorldPoint worldPoint)
-//	{
-//		/*
-//		 * Return and remove the lootbeam from this location if lootbeam are disabled
-//		 * Lootbeam can be at this location if the config was just changed
-//		 */
-//		if (!(config.showLootbeamForHighlighted() || config.showLootbeamTier() != HighlightTier.OFF))
-//		{
-//			removeLootbeam(worldPoint);
-//			return;
-//		}
-//
-//		int price = -1;
-//		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
-//		for (GroundItem groundItem : groundItems)
-//		{
-//			if ((config.onlyShowLoot() && !groundItem.isMine()))
-//			{
-//				continue;
-//			}
-//
-//			/*
-//			 * highlighted items have the highest priority so if an item is highlighted at this location
-//			 * we can early return
-//			 */
-//			NamedQuantity item = new NamedQuantity(groundItem);
-//			if (config.showLootbeamForHighlighted()
-//				&& TRUE.equals(highlightedItems.getUnchecked(item)))
-//			{
-//				addLootbeam(worldPoint, config.highlightedColor());
-//				return;
-//			}
-//
-//			// Explicit hide takes priority over implicit highlight
-//			if (TRUE.equals(hiddenItems.getUnchecked(item)))
-//			{
-//				continue;
-//			}
-//
-//			int itemPrice = getValueByMode(groundItem.getGePrice(), groundItem.getHaPrice());
-//			price = Math.max(itemPrice, price);
-//		}
-//
-//		if (config.showLootbeamTier() != HighlightTier.OFF)
-//		{
-//			for (PriceHighlight highlight : priceChecks)
-//			{
-//				if (price > highlight.getPrice() && price > config.showLootbeamTier().getValueFromTier(config))
-//				{
-//					addLootbeam(worldPoint, highlight.color);
-//					return;
-//				}
-//			}
-//		}
-//
-//		removeLootbeam(worldPoint);
-//	}
-//
-//	private void handleLootbeams()
-//	{
-//		for (WorldPoint worldPoint : collectedGroundItems.rowKeySet())
-//		{
-//			handleLootbeam(worldPoint);
-//		}
-//	}
-//
-//	private void removeAllLootbeams()
-//	{
-//		for (Lootbeam lootbeam : lootbeams.values())
-//		{
-//			lootbeam.remove();
-//		}
-//
-//		lootbeams.clear();
-//	}
-//
-//	private void addLootbeam(WorldPoint worldPoint, Color color)
-//	{
-//		Lootbeam lootbeam = lootbeams.get(worldPoint);
-//		if (lootbeam == null)
-//		{
-//			lootbeam = new Lootbeam(client, worldPoint, color);
-//			lootbeams.put(worldPoint, lootbeam);
-//		}
-//		else
-//		{
-//			lootbeam.setColor(color);
-//		}
-//	}
-//
-//	private void removeLootbeam(WorldPoint worldPoint)
-//	{
-//		Lootbeam lootbeam = lootbeams.remove(worldPoint);
-//		if (lootbeam != null)
-//		{
-//			lootbeam.remove();
-//		}
-//	}
+	private void handleLootbeam(WorldPoint worldPoint)
+	{
+		/*
+		 * Return and remove the lootbeam from this location if lootbeam are disabled
+		 * Lootbeam can be at this location if the config was just changed
+		 */
+		if (!rainbowRaveConfig.recolorLootBeams() || !(rainbowRaveConfig.getGroundItemsHighlightedItemsLootbeam() || rainbowRaveConfig.getGroundItemsLootbeamTier() != HighlightTier.OFF))
+		{
+			removeLootbeam(worldPoint);
+			return;
+		}
+
+		int price = -1;
+		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
+		for (GroundItem groundItem : groundItems)
+		{
+			if ((config.onlyShowLoot() && !groundItem.isMine()))
+			{
+				continue;
+			}
+
+			/*
+			 * highlighted items have the highest priority so if an item is highlighted at this location
+			 * we can early return
+			 */
+			NamedQuantity item = new NamedQuantity(groundItem);
+			if (rainbowRaveConfig.getGroundItemsHighlightedItemsLootbeam()
+				&& TRUE.equals(highlightedItems.getUnchecked(item)))
+			{
+				addLootbeam(worldPoint, config.highlightedColor(), null);
+				return;
+			}
+
+			// Explicit hide takes priority over implicit highlight
+			if (TRUE.equals(hiddenItems.getUnchecked(item)))
+			{
+				continue;
+			}
+
+			int itemPrice = getValueByMode(groundItem.getGePrice(), groundItem.getHaPrice());
+			price = Math.max(itemPrice, price);
+		}
+
+		if (rainbowRaveConfig.getGroundItemsLootbeamTier() != HighlightTier.OFF)
+		{
+			for (PriceHighlight highlight : priceChecks)
+			{
+				if (price > highlight.getPrice() && price > rainbowRaveConfig.getGroundItemsLootbeamTier().getValueFromTier(config))
+				{
+					addLootbeam(worldPoint, highlight.color, rainbowRaveConfig.getGroundItemsLootbeamTier());
+					return;
+				}
+			}
+		}
+
+		removeLootbeam(worldPoint);
+	}
+
+	private void handleLootbeams()
+	{
+		for (WorldPoint worldPoint : collectedGroundItems.rowKeySet())
+		{
+			handleLootbeam(worldPoint);
+		}
+	}
+
+	private void removeAllLootbeams()
+	{
+		for (Lootbeam lootbeam : lootbeams.values())
+		{
+			lootbeam.remove();
+		}
+
+		lootbeams.clear();
+	}
+
+	private void addLootbeam(WorldPoint worldPoint, Color color, HighlightTier tier)
+	{
+		Lootbeam lootbeam = lootbeams.get(worldPoint);
+		if (lootbeam == null)
+		{
+			lootbeam = new Lootbeam(client, clientThread, worldPoint, color, config.lootbeamStyle().name(), tier);
+			lootbeams.put(worldPoint, lootbeam);
+		}
+		else
+		{
+			lootbeam.setColor(color);
+			lootbeam.setStyle(config.lootbeamStyle().name());
+		}
+	}
+
+	private void removeLootbeam(WorldPoint worldPoint)
+	{
+		Lootbeam lootbeam = lootbeams.remove(worldPoint);
+		if (lootbeam != null)
+		{
+			lootbeam.remove();
+		}
+	}
 }

@@ -1,13 +1,19 @@
 package com.rainbowrave;
 
 import static com.rainbowrave.RainbowRaveConfig.NpcsToHighlight.SAME;
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.plugins.grounditems.config.HighlightTier;
 
 @ConfigGroup(RainbowRavePlugin.GROUP)
 public interface RainbowRaveConfig extends Config
 {
+
+	String LOOT_BEAMS_TIER_CONFIG_KEY = "groundItemsLootbeamTier";
+	String LOOT_BEAMS_HIGHLIGHT_CONFIG_KEY = "groundItemsHighlightedItemsLootbeam";
+
 	enum NpcsToHighlight {
 		NONE,
 		SAME,
@@ -26,14 +32,18 @@ public interface RainbowRaveConfig extends Config
 		ALL
 	}
 
+	@RequiredArgsConstructor
 	enum GroundItemsToColor {
-		NONE,
-		INSANE,
-		HIGH,
-		MEDIUM,
-		LOW,
-		REGULAR,
-		HIDDEN
+		NONE(HighlightTier.INSANE.ordinal() + 1),
+		INSANE(HighlightTier.INSANE.ordinal()),
+		HIGH(HighlightTier.HIGH.ordinal()),
+		MEDIUM(HighlightTier.MEDIUM.ordinal()),
+		LOW(HighlightTier.LOW.ordinal()),
+		REGULAR(HighlightTier.LOW.ordinal() - 1),
+		HIDDEN(HighlightTier.LOW.ordinal() - 2),
+		;
+
+		public final int highlightTierRelativeOrdinal;
 	}
 
 	enum GroundMarkerColorMode {
@@ -217,8 +227,9 @@ public interface RainbowRaveConfig extends Config
 		return false;
 	}
 
+	String RECOLOR_LOOT_BEAMS_KEY = "recolorLootBeams";
 	@ConfigItem(
-		keyName = "recolorLootBeams",
+		keyName = RECOLOR_LOOT_BEAMS_KEY,
 		name = "Loot beams",
 		description = "Recolor loot beams.",
 		position = 14
@@ -239,4 +250,43 @@ public interface RainbowRaveConfig extends Config
 		return MouseTrailStyle.NONE;
 	}
 
+	@ConfigItem(
+		keyName = LOOT_BEAMS_TIER_CONFIG_KEY,
+		name = "Lootbeam tier",
+		description = "The lowest tier of which lootbeams should be shown for. You should modify this setting instead of the identical setting in Ground items, if you are using rainbow rave to recolor loot beams.",
+		position = 101
+	)
+	default HighlightTier getGroundItemsLootbeamTier() {
+		return null;
+	}
+
+	@ConfigItem(
+		keyName = LOOT_BEAMS_TIER_CONFIG_KEY,
+		name = "",
+		description = "",
+		hidden = true
+	)
+	default void setGroundItemsLootbeamTier(HighlightTier tier) {
+
+	}
+
+	@ConfigItem(
+		keyName = LOOT_BEAMS_HIGHLIGHT_CONFIG_KEY,
+		name = "Highlighted item lootbeams",
+		description = "Show lootbeams for highlighted items. You should modify this setting instead of the identical setting in Ground items, if you are using rainbow rave to recolor loot beams.",
+		position = 100
+	)
+	default boolean getGroundItemsHighlightedItemsLootbeam() {
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = LOOT_BEAMS_HIGHLIGHT_CONFIG_KEY,
+		name = "",
+		description = "",
+		hidden = true
+	)
+	default void setGroundItemsHighlightedItemsLootbeam(boolean lootbeamsForHighlightedItems) {
+
+	}
 }

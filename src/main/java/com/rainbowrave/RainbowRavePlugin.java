@@ -36,8 +36,8 @@ import net.runelite.api.Client;
 import net.runelite.api.GraphicsObject;
 import net.runelite.api.Model;
 import net.runelite.api.NPC;
-import net.runelite.api.RuneLiteObject;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -199,6 +199,12 @@ public class RainbowRavePlugin extends Plugin
 		}
 	}
 
+	// Ground items has to use this itemspawned subscriber because registering it in startup is not fast enough to get the itemspawned events that are fired when a plugin is started.
+	@Subscribe
+	public void onItemSpawned(ItemSpawned e) {
+		rainbowRaveGroundItemsPlugin.onItemSpawned(e);
+	}
+
 	@Override
 	protected void shutDown()
 	{
@@ -295,18 +301,34 @@ public class RainbowRavePlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
-		for (GraphicsObject graphicsObject : client.getGraphicsObjects())
+		if (config.recolorLootBeams())
 		{
-			if (
-				config.recolorScytheSwings() && (
+			boolean colorHighlightedItems = config.colorHighlightedGroundItems();
+			int tierOrdinal = config.whichGroundItemsToColor().highlightTierRelativeOrdinal;
+			for (Lootbeam value : rainbowRaveGroundItemsPlugin.lootbeams.values())
+			{
+				if (
+					value.tier == null ?
+						colorHighlightedItems :
+						value.tier.ordinal() >= tierOrdinal
+				)
+				{
+					recolorAllFaces(value.runeLiteObject.getModel(), getColor(value.runeLiteObject.getLocation().hashCode()));
+				}
+			}
+		}
+		if (config.recolorScytheSwings())
+		{
+			for (GraphicsObject graphicsObject : client.getGraphicsObjects())
+			{
+				if (
 					scytheTrailIds.contains(graphicsObject.getId()) ||
 					(graphicsObject.getId() >= 1231 && graphicsObject.getId() <= 1235) || // chally trails + 1 red trail.
 					(graphicsObject.getId() >= 1891 && graphicsObject.getId() <= 1898) // sara and sang scythe swing trails
-				) ||
-				config.recolorLootBeams() && graphicsObject instanceof RuneLiteObject
-			)
-			{
-				recolorAllFaces(graphicsObject.getModel(), getColor(graphicsObject.getLocation().hashCode()));
+				)
+				{
+					recolorAllFaces(graphicsObject.getModel(), getColor(graphicsObject.getLocation().hashCode()));
+				}
 			}
 		}
 	}
