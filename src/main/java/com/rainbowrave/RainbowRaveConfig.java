@@ -257,7 +257,7 @@ public interface RainbowRaveConfig extends Config
 		position = 101
 	)
 	default HighlightTier getGroundItemsLootbeamTier() {
-		return null;
+		return HighlightTier.OFF; // Needs a value to prevent NPE in some situations.
 	}
 
 	@ConfigItem(

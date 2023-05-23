@@ -49,6 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -245,7 +246,7 @@ public class RainbowRaveGroundItemsPlugin
 	{
 		if (rainbowRaveConfig.recolorLootBeams())
 		{
-			if (!turningOnRecolorLootBeams)
+			if (!turningOnRecolorLootBeams && SwingUtilities.isEventDispatchThread()) // Changes from profile changes happen on the executor thread, only show the message when it happens on the swing thread.
 			{
 				clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
 					"Rainbow Rave: Please change loot beam settings through the rainbow rave plugin's settings, as rainbow rave needs to disable regular loot beams in order to recolor them.",

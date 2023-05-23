@@ -93,9 +93,9 @@ public class RainbowRaveMouseTrailPlugin
 
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle")) {
-            setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
-        }
+        if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichMouseTrailStyle") && configChanged.getNewValue() != null) {
+			setMouseListenerEnabled(!configChanged.getNewValue().equals("NONE"));
+		}
     }
 
     public void updateMousePositions(Point point) {
