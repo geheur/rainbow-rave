@@ -74,6 +74,7 @@ import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.events.PlayerLootReceived;
@@ -186,6 +187,11 @@ public class RainbowRaveGroundItemsPlugin
 		keyManager.registerKeyListener(inputListener);
 		executor.execute(this::reset);
 		lastUsedItem = -1;
+	}
+
+	@Subscribe
+	public void onClientShutdown(ClientShutdown e) {
+		restoreGroundItemLootBeams();
 	}
 
 //	@Override
