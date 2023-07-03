@@ -191,13 +191,19 @@ public class RainbowRaveGroundItemsPlugin
 
 	@Subscribe
 	public void onClientShutdown(ClientShutdown e) {
-		restoreGroundItemLootBeams();
+		if (rainbowRaveConfig.recolorLootBeams())
+		{
+			restoreGroundItemLootBeams();
+		}
 	}
 
 //	@Override
 	protected void shutDown()
 	{
-		restoreGroundItemLootBeams();
+		if (rainbowRaveConfig.recolorLootBeams())
+		{
+			restoreGroundItemLootBeams();
+		}
 //		overlayManager.remove(overlay);
 		mouseManager.unregisterMouseListener(inputListener);
 		keyManager.unregisterKeyListener(inputListener);
