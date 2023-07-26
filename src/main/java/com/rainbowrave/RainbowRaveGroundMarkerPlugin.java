@@ -59,9 +59,6 @@ import static net.runelite.http.api.RuneLiteAPI.GSON;
 public class RainbowRaveGroundMarkerPlugin
 {
 	private static final String CONFIG_GROUP = "groundMarker";
-	private static final String MARK = "Mark tile";
-	private static final String UNMARK = "Unmark tile";
-	private static final String LABEL = "Label tile";
 	private static final String WALK_HERE = "Walk here";
 	private static final String REGION_PREFIX = "region_";
 
@@ -206,17 +203,17 @@ public class RainbowRaveGroundMarkerPlugin
 		}
 
 		Tile target = client.getSelectedSceneTile();
-		if (target == null)
+		if (target == null || !event.getMenuTarget().equals("Tile"))
 		{
 			return;
 		}
 
 		final String option = event.getMenuOption();
-		if (option.equals(MARK) || option.equals(UNMARK))
+		if (option.equals("Mark") || option.equals("Unmark"))
 		{
 			markTile(target.getLocalLocation());
 		}
-		else if (option.equals(LABEL))
+		else if (option.equals("Label"))
 		{
 			labelTile(target);
 		}
