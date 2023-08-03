@@ -301,9 +301,20 @@ public class RainbowRavePlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
-		if (config.recolorLootBeams())
+		if(config.dukeRave())
 		{
-			boolean colorHighlightedItems = config.colorHighlightedGroundItems();
+			for (NPC npc: client.getNpcs())
+			{
+				if(npc.getId()>=12199 && npc.getId() <= 12201)
+				{
+					recolorAllFaces(npc.getModel(), getColor((int)npc.getHash()));
+				}
+			}
+		}
+
+		if (config.recolorLootBeams())
+	{
+		boolean colorHighlightedItems = config.colorHighlightedGroundItems();
 			int tierOrdinal = config.whichGroundItemsToColor().highlightTierRelativeOrdinal;
 			for (Lootbeam value : rainbowRaveGroundItemsPlugin.lootbeams.values())
 			{

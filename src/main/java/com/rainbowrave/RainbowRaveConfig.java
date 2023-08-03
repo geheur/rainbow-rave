@@ -139,93 +139,45 @@ public interface RainbowRaveConfig extends Config
 	String OLD_TILE_COLOR_WAVES_KEY = "smoothWaves";
 	String GROUND_MARKER_COLOR_MODE_KEY = "groundMarkerColorMode";
 
-	@ConfigItem(
-		keyName = GROUND_MARKER_COLOR_MODE_KEY,
-		name = "Tile Color Mode",
-		description = "\"waves\" makes tile color smooth between adjacent tiles, and \"color sync\" makes tiles with the same color in ground markers share the same color.",
-		position = 6
-	)
-	default GroundMarkerColorMode groundMarkerColorMode()
-	{
-		return GroundMarkerColorMode.RANDOM;
-	}
+	@ConfigItem(name=
+		"Tile Color Mode",
+		description = "\"waves\" makes tile color smooth between adjacent tiles, and \"color sync\" makes tiles with the same color in ground markers share the same color.", keyName = GROUND_MARKER_COLOR_MODE_KEY, position = 6
+	) default GroundMarkerColorMode groundMarkerColorMode() { return GroundMarkerColorMode.RANDOM; }
 
-	@ConfigItem(
-		keyName = "fillTiles",
-		name = "Fill tiles",
-		description = "Fills the tile with an opaque square.",
-		position = 7
-	)
-	default boolean fillTiles()
-	{
-		return false;
-	}
+	@ConfigItem(name=
+		"Fill tiles",
+		description = "Fills the tile with an opaque square.", keyName = "fillTiles", position = 7
+	) default boolean fillTiles() { return false; }
 
-	@ConfigItem(
-		keyName = "useBrushMarkerTiles",
-		name = "Brush Marker Tiles",
-		description = "Applies rainbow to tile markers from the \"Brush Markers\" plugin hub plugin. This plugin can be used to mark lots of tiles at once.",
-		position = 8
-	)
-	default boolean useBrushMarkerTiles()
-	{
-		return false;
-	}
+	@ConfigItem(name=
+		"Brush Marker Tiles",
+		description = "Applies rainbow to tile markers from the \"Brush Markers\" plugin hub plugin. This plugin can be used to mark lots of tiles at once.", keyName = "useBrushMarkerTiles", position = 8
+	) default boolean useBrushMarkerTiles() { return false; }
 
-	@ConfigItem(
-		keyName = "whichObjectsToHighlight",
-		name = "Object highlight",
-		description = "Which objects to highlight.",
-		position = 9
-	)
-	default ObjectsToHighlight whichObjectsToHighlight()
-	{
-		return ObjectsToHighlight.SAME;
-	}
+	@ConfigItem(name=
+		"Object highlight",
+		description = "Which objects to highlight.", keyName = "whichObjectsToHighlight", position = 9
+	) default ObjectsToHighlight whichObjectsToHighlight() { return ObjectsToHighlight.SAME; }
 
-	@ConfigItem(
-		keyName = "whichItemsToInventoryTag",
-		name = "Inventory tags",
-		description = "Which items to tag.",
-		position = 10
-	)
-	default ItemsToTag whichItemsToInventoryTag()
-	{
-		return ItemsToTag.SAME;
-	}
+	@ConfigItem(name=
+		"Inventory tags",
+		description = "Which items to tag.", keyName = "whichItemsToInventoryTag", position = 10
+	) default ItemsToTag whichItemsToInventoryTag() { return ItemsToTag.SAME; }
 
-	@ConfigItem(
-		keyName = "colorHighlightedGroundItems",
-		name = "Highlight Ground Items",
-		description = "Applies rainbow to highlighted items.",
-		position = 11
-	)
-	default boolean colorHighlightedGroundItems()
-	{
-		return true;
-	}
+	@ConfigItem(name =
+		"Highlight Ground Items",
+		description = "Applies rainbow to highlighted items.", keyName = "colorHighlightedGroundItems", position = 11
+	) default boolean colorHighlightedGroundItems() { return true; }
 
-	@ConfigItem(
-		keyName = "whichGroundItemsToColor",
-		name = "Ground Items",
-		description = "Items in this tier and above are colored.",
-		position = 12
-	)
-	default GroundItemsToColor whichGroundItemsToColor()
-	{
-		return GroundItemsToColor.REGULAR;
-	}
+	@ConfigItem(name =
+		"Ground Items",
+		description = "Items in this tier and above are colored.", keyName = "whichGroundItemsToColor", position = 12
+	) default GroundItemsToColor whichGroundItemsToColor() { return GroundItemsToColor.REGULAR; }
 
-	@ConfigItem(
-		keyName = "recolorScytheSwings",
-		name = "Scythe swings",
-		description = "Recolor scythe swings. Swing trails may not return to normal after disabling.",
-		position = 13
-	)
-	default boolean recolorScytheSwings()
-	{
-		return false;
-	}
+	@ConfigItem(name =
+		"Scythe swings",
+		description = "Recolor scythe swings. Swing trails may not return to normal after disabling.", keyName = "recolorScytheSwings", position = 13
+	) default boolean recolorScytheSwings() { return false; }
 
 	String RECOLOR_LOOT_BEAMS_KEY = "recolorLootBeams";
 	@ConfigItem(
@@ -288,5 +240,16 @@ public interface RainbowRaveConfig extends Config
 	)
 	default void setGroundItemsHighlightedItemsLootbeam(boolean lootbeamsForHighlightedItems) {
 
+	}
+
+	@ConfigItem(
+		keyName = "recolorDukeLights",
+		name = "Duke rave",
+		description = "Recolor the lights at duke. Duke lights may not return to normal after disabling.",
+		position = 200
+	)
+	default boolean dukeRave()
+	{
+		return false;
 	}
 }
