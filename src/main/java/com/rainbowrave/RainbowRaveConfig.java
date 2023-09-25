@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.plugins.grounditems.config.HighlightTier;
 
 @ConfigGroup(RainbowRavePlugin.GROUP)
@@ -246,10 +247,46 @@ public interface RainbowRaveConfig extends Config
 		keyName = "recolorDukeLights",
 		name = "Duke rave",
 		description = "Recolor the lights at duke. Duke lights may not return to normal after disabling.",
-		position = 200
+		position = 110
 	)
 	default boolean dukeRave()
 	{
+		return false;
+	}
+
+	@ConfigSection(name = "Tile Indicators", description = "Tile Indicators", position = 150)
+	String tileIndicatorsSection = "tileIndicatorsSection";
+
+	@ConfigItem(
+		keyName = "recolorTileIndicators",
+		name = "Tile indicators",
+		description = "Recolor the tiles from the tile indicators plugin.",
+		section = tileIndicatorsSection,
+		position = 150
+	)
+	default boolean recolorTileIndicators() {
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "recolorTileIndicatorFill",
+		name = "Also recolor fill",
+		description = "Recolor the fill color of tile indicators as well",
+		section = tileIndicatorsSection,
+		position = 151
+	)
+	default boolean recolorTileIndicatorFill() {
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "preferCornerTileIndicatorsConfig",
+		name = "Prefer \"Corner tile indicators\"",
+		description = "Prefers to use the config from my \"Corner tile indicators\" plugin, if it is installed, including true tile fadeout and corner-only highlight.",
+		section = tileIndicatorsSection,
+		position = 152
+	)
+	default boolean preferCornerTileIndicatorsConfig() {
 		return false;
 	}
 }

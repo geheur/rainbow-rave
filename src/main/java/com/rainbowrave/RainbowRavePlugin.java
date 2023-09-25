@@ -64,7 +64,7 @@ import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 @Slf4j
 @PluginDescriptor(
 	name = "Rainbow Rave",
-	tags = {"loot, beam"}
+	tags = {"loot, beam, ground, item, tile, indicator, npc, object, inventory, tag"}
 )
 @PluginDependency(NpcIndicatorsPlugin.class)
 @PluginDependency(GroundMarkerPlugin.class)
@@ -125,6 +125,11 @@ public class RainbowRavePlugin extends Plugin
 	private RainbowRaveGroundItemsOverlay rainbowRaveGroundItemsOverlay;
 
 	@Inject
+	private RainbowRaveTileIndicatorsPlugin rainbowRaveTileIndicatorsPlugin;
+
+	private RainbowRaveTileIndicatorsOverlay rainbowRaveTileIndicatorsOverlay;
+
+	@Inject
 	private RainbowRaveMouseTrailPlugin rainbowRaveMouseTrailPlugin;
 
 	private RainbowRaveMouseTrailOverlay rainbowRaveMouseTrailOverlay;
@@ -178,6 +183,8 @@ public class RainbowRavePlugin extends Plugin
 		rainbowRaveGroundItemsPlugin.startUp();
 		eventBus.register(rainbowRaveGroundItemsPlugin);
 
+		startRRTIPlugin();
+
 		if (rainbowRaveMouseTrailOverlay == null) {
 			rainbowRaveMouseTrailOverlay = new RainbowRaveMouseTrailOverlay(this, rainbowRaveMouseTrailPlugin, config);
 		}
@@ -226,6 +233,8 @@ public class RainbowRavePlugin extends Plugin
 		rainbowRaveGroundItemsPlugin.shutDown();
 		eventBus.unregister(rainbowRaveGroundItemsPlugin);
 
+		stopRRTIPlugin();
+
 		overlayManager.remove(rainbowRaveMouseTrailOverlay);
 		rainbowRaveMouseTrailPlugin.shutDown();
 		eventBus.unregister(rainbowRaveMouseTrailPlugin);
@@ -241,21 +250,57 @@ public class RainbowRavePlugin extends Plugin
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged) {
-		checkAndPushOverlayToFront(configChanged, "grounditemsplugin", rainbowRaveGroundItemsOverlay);
-		checkAndPushOverlayToFront(configChanged, "groundmarkerplugin", rainbowRaveGroundMarkerOverlay);
-		checkAndPushOverlayToFront(configChanged, "inventorytagsplugin", rainbowRaveInventoryTagsOverlay);
-		checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
-		checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
-		checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
-
-		if (configChanged.getGroup().equals("rainbow_rave") && configChanged.getKey().equals("whichNpcsToHighlight")) {
-			updateNpcHighlighterWithConfigSettings();
+		if (configChanged.getGroup().equals("runelite"))
+		{
+			checkAndPushOverlayToFront(configChanged, "grounditemsplugin", rainbowRaveGroundItemsOverlay);
+			checkAndPushOverlayToFront(configChanged, "groundmarkerplugin", rainbowRaveGroundMarkerOverlay);
+			checkAndPushOverlayToFront(configChanged, "inventorytagsplugin", rainbowRaveInventoryTagsOverlay);
+			checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
+			checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
+			checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
+			if (config.recolorTileIndicators()) checkAndPushOverlayToFront(configChanged, "tileindicatorsplugin", rainbowRaveTileIndicatorsOverlay);
 		}
+		else if (configChanged.getGroup().equals("rainbow_rave"))
+		{
+			if (configChanged.getKey().equals("whichNpcsToHighlight"))
+			{
+				updateNpcHighlighterWithConfigSettings();
+			}
+			else if (configChanged.getKey().equals("recolorTileIndicators"))
+			{
+				if (config.recolorTileIndicators())
+				{
+					startRRTIPlugin();
+				}
+				else
+				{
+					stopRRTIPlugin();
+				}
+			}
+		}
+	}
+
+	private void stopRRTIPlugin()
+	{
+		overlayManager.remove(rainbowRaveTileIndicatorsOverlay);
+		rainbowRaveTileIndicatorsPlugin.shutDown();
+		eventBus.unregister(rainbowRaveTileIndicatorsPlugin);
+	}
+
+	private void startRRTIPlugin()
+	{
+		if (rainbowRaveTileIndicatorsOverlay == null)
+		{
+			rainbowRaveTileIndicatorsOverlay = new RainbowRaveTileIndicatorsOverlay(client, rainbowRaveTileIndicatorsPlugin, this);
+		}
+		overlayManager.add(rainbowRaveTileIndicatorsOverlay);
+		rainbowRaveTileIndicatorsPlugin.startUp();
+		eventBus.register(rainbowRaveTileIndicatorsPlugin);
 	}
 
 	private void checkAndPushOverlayToFront(ConfigChanged configChanged, String key, Overlay overlay)
 	{
-		if (configChanged.getGroup().equals("runelite") && configChanged.getKey().equals(key) && configChanged.getNewValue().equalsIgnoreCase("true")) {
+		if (configChanged.getKey().equals(key) && configChanged.getNewValue().equalsIgnoreCase("true")) {
 			clientThread.invokeLater(() -> {
 				overlayManager.remove(overlay);
 				overlayManager.add(overlay);
