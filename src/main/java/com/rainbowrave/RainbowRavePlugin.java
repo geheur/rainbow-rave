@@ -183,7 +183,9 @@ public class RainbowRavePlugin extends Plugin
 		rainbowRaveGroundItemsPlugin.startUp();
 		eventBus.register(rainbowRaveGroundItemsPlugin);
 
-		startRRTIPlugin();
+		if (config.recolorTileIndicators()) {
+			startRRTIPlugin();
+		}
 
 		if (rainbowRaveMouseTrailOverlay == null) {
 			rainbowRaveMouseTrailOverlay = new RainbowRaveMouseTrailOverlay(this, rainbowRaveMouseTrailPlugin, config);
