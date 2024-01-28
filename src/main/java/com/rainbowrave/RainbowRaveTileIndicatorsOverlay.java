@@ -65,13 +65,13 @@ public class RainbowRaveTileIndicatorsOverlay extends Overlay
 			// If we have tile "selected" render it
 			if (client.getSelectedSceneTile() != null)
 			{
-				renderTile(graphics, client.getSelectedSceneTile().getLocalLocation(), plugin.highlightHoveredColor, plugin.hoveredTileBorderWidth, plugin.hoveredTileFillColor, plugin.hoveredTileCornersOnly, plugin.hoveredTileCornerSize);
+				renderTile(graphics, client.getSelectedSceneTile().getLocalLocation(), rainbowRavePlugin.getColor(0), plugin.hoveredTileBorderWidth, plugin.hoveredTileFillColor, plugin.hoveredTileCornersOnly, plugin.hoveredTileCornerSize);
 			}
 		}
 
 		if (plugin.highlightDestinationTile)
 		{
-			renderTile(graphics, client.getLocalDestinationLocation(), plugin.highlightDestinationColor, plugin.destinationTileBorderWidth, plugin.destinationTileFillColor, plugin.destinationTileCornersOnly, plugin.destinationTileCornerSize);
+			renderTile(graphics, client.getLocalDestinationLocation(), rainbowRavePlugin.getColor(0), plugin.destinationTileBorderWidth, plugin.destinationTileFillColor, plugin.destinationTileCornersOnly, plugin.destinationTileCornerSize);
 		}
 
 		if (plugin.highlightCurrentTile)
