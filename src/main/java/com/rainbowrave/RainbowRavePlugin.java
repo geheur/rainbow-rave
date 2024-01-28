@@ -260,7 +260,10 @@ public class RainbowRavePlugin extends Plugin
 			checkAndPushOverlayToFront(configChanged, "npcindicatorsplugin", rainbowRaveNpcSceneOverlay);
 			checkAndPushOverlayToFront(configChanged, "objectindicatorsplugin", rainbowRaveObjectIndicatorsOverlay);
 			checkAndPushOverlayToFront(configChanged, "brushmarkerplugin", rainbowRaveGroundMarkerOverlay);
-			if (config.recolorTileIndicators()) checkAndPushOverlayToFront(configChanged, "tileindicatorsplugin", rainbowRaveTileIndicatorsOverlay);
+			if (config.recolorTileIndicators()) {
+				checkAndPushOverlayToFront(configChanged, "tileindicatorsplugin", rainbowRaveTileIndicatorsOverlay);
+				checkAndPushOverlayToFront(configChanged, "cornertileindicatorsplugin", rainbowRaveTileIndicatorsOverlay);
+			}
 		}
 		else if (configChanged.getGroup().equals("rainbow_rave"))
 		{
