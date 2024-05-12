@@ -31,9 +31,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,18 +72,6 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 	private static final Color PUBLIC_TIMER_COLOR = Color.YELLOW;
 	private static final Color PRIVATE_TIMER_COLOR = Color.GREEN;
 	private static final int TIMER_OVERLAY_DIAMETER = 10;
-	private static final Duration DESPAWN_TIME_INSTANCE = Duration.ofMinutes(30);
-	private static final Duration DESPAWN_TIME_LOOT = Duration.ofMinutes(2);
-	private static final Duration DESPAWN_TIME_DROP = Duration.ofMinutes(3);
-	private static final Duration DESPAWN_TIME_TABLE = Duration.ofMinutes(10);
-	private static final int KRAKEN_REGION = 9116;
-	private static final int KBD_NMZ_REGION = 9033;
-	private static final int ZILYANA_REGION = 11602;
-	private static final int GRAARDOR_REGION = 11347;
-	private static final int KRIL_TSUTSAROTH_REGION = 11603;
-	private static final int KREEARRA_REGION = 11346;
-	private static final int NIGHTMARE_REGION = 15515;
-	private static final int TEMPOROSS_REGION = 12078;
 
 	private final Client client;
 	private final RainbowRaveGroundItemsPlugin plugin;
@@ -184,7 +170,7 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		plugin.setHiddenBoxBounds(null);
 		plugin.setHighlightBoxBounds(null);
 
-		final boolean onlyShowLoot = config.onlyShowLoot();
+		final boolean onlyShowLoot = config.onlyShowOwnItems();
 		final DespawnTimerMode groundItemTimers = config.groundItemTimers();
 		final boolean outline = config.textOutline();
 
@@ -403,89 +389,14 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 
 	private Instant calculateDespawnTime(GroundItem groundItem)
 	{
-		// We can only accurately guess despawn times for our own pvm loot, dropped items,
-		// and items we placed on tables
-		if (groundItem.getLootType() != LootType.PVM
-			&& groundItem.getLootType() != LootType.DROPPED
-			&& groundItem.getLootType() != LootType.TABLE)
-		{
-			return null;
-		}
-
-		// Loot appears to others after 1 minute, and despawns after 2 minutes
-		// Dropped items appear to others after 1 minute, and despawns after 3 minutes
-		// Items in instances never appear to anyone and despawn after 30 minutes
-
 		Instant spawnTime = groundItem.getSpawnTime();
 		if (spawnTime == null)
 		{
 			return null;
 		}
 
-		final Instant despawnTime;
-		Instant now = Instant.now();
-		if (client.isInInstancedRegion())
-		{
-			final int playerRegionID = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID();
-			if (playerRegionID == KRAKEN_REGION)
-			{
-				// Items in the Kraken instance never despawn
-				return null;
-			}
-			else if (playerRegionID == KBD_NMZ_REGION)
-			{
-				// NMZ and the KBD lair uses the same region ID but NMZ uses planes 1-3 and KBD uses plane 0
-				if (client.getLocalPlayer().getWorldLocation().getPlane() == 0)
-				{
-					// Items in the KBD instance use the standard despawn timer
-					despawnTime = spawnTime.plus(groundItem.getLootType() == LootType.DROPPED
-						? DESPAWN_TIME_DROP
-						: DESPAWN_TIME_LOOT);
-				}
-				else
-				{
-					if (groundItem.getLootType() == LootType.DROPPED)
-					{
-						// Dropped items in the NMZ instance never despawn
-						return null;
-					}
-					else
-					{
-						despawnTime = spawnTime.plus(DESPAWN_TIME_LOOT);
-					}
-				}
-			}
-			else if (playerRegionID == ZILYANA_REGION || playerRegionID == GRAARDOR_REGION ||
-				playerRegionID == KRIL_TSUTSAROTH_REGION || playerRegionID == KREEARRA_REGION ||
-				playerRegionID == NIGHTMARE_REGION ||  playerRegionID == TEMPOROSS_REGION)
-			{
-				// GWD, Nightmare, and Tempoross instances use the normal despawn timers
-				despawnTime = spawnTime.plus(groundItem.getLootType() == LootType.DROPPED
-					? DESPAWN_TIME_DROP
-					: DESPAWN_TIME_LOOT);
-			}
-			else
-			{
-				despawnTime = spawnTime.plus(DESPAWN_TIME_INSTANCE);
-			}
-		}
-		else
-		{
-			switch (groundItem.getLootType())
-			{
-				case DROPPED:
-					despawnTime = spawnTime.plus(DESPAWN_TIME_DROP);
-					break;
-				case TABLE:
-					despawnTime = spawnTime.plus(DESPAWN_TIME_TABLE);
-					break;
-				default:
-					despawnTime = spawnTime.plus(DESPAWN_TIME_LOOT);
-					break;
-			}
-		}
-
-		if (now.isBefore(spawnTime) || now.isAfter(despawnTime))
+		Instant despawnTime = spawnTime.plus(groundItem.getDespawnTime());
+		if (Instant.now().isAfter(despawnTime))
 		{
 			// that's weird
 			return null;
@@ -496,15 +407,6 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 
 	private Color getItemTimerColor(GroundItem groundItem)
 	{
-		// We can only accurately guess despawn times for our own pvm loot, dropped items,
-		// and items we placed on tables
-		if (groundItem.getLootType() != LootType.PVM
-			&& groundItem.getLootType() != LootType.DROPPED
-			&& groundItem.getLootType() != LootType.TABLE)
-		{
-			return null;
-		}
-
 		final Instant spawnTime = groundItem.getSpawnTime();
 		if (spawnTime == null)
 		{
@@ -512,16 +414,30 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		}
 
 		final Instant now = Instant.now();
+		final Instant despawnTime = spawnTime.plus(groundItem.getDespawnTime());
 
-		// If it has not yet been a minute, the item is private
-		if (client.isInInstancedRegion() || spawnTime.plus(1, ChronoUnit.MINUTES).isAfter(now))
+		if (groundItem.isPrivate())
+		{
+			if (despawnTime.isAfter(now))
+			{
+				return PRIVATE_TIMER_COLOR;
+			}
+
+			return null;
+		}
+
+		// otherwise it is private until visibleTime, then it is public
+		final Instant visibleTime = spawnTime.plus(groundItem.getVisibleTime());
+		if (visibleTime.isAfter(now))
 		{
 			return PRIVATE_TIMER_COLOR;
 		}
-		else
+		if (despawnTime.isAfter(now))
 		{
 			return PUBLIC_TIMER_COLOR;
 		}
+
+		return null;
 	}
 
 	private void drawTimerPieOverlay(Graphics2D graphics, int textX, int textY, GroundItem groundItem, Color color)

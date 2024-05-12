@@ -27,7 +27,6 @@ package com.rainbowrave;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
@@ -38,13 +37,13 @@ import static com.rainbowrave.RainbowRaveConfig.GroundItemsToColor.MEDIUM;
 import java.awt.Color;
 import java.awt.Rectangle;
 import static java.lang.Boolean.TRUE;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +58,6 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemID;
-import net.runelite.api.MenuAction;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.coords.WorldPoint;
@@ -68,23 +66,19 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemQuantityChanged;
 import net.runelite.api.events.ItemSpawned;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.widgets.InterfaceID;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.events.NpcLootReceived;
-import net.runelite.client.events.PlayerLootReceived;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemStack;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
 import net.runelite.client.plugins.grounditems.config.HighlightTier;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.RSTimeUnit;
 import net.runelite.client.util.Text;
 
 public class RainbowRaveGroundItemsPlugin
@@ -174,8 +168,6 @@ public class RainbowRaveGroundItemsPlugin
 	private List<PriceHighlight> priceChecks = ImmutableList.of();
 	private LoadingCache<NamedQuantity, Boolean> highlightedItems;
 	private LoadingCache<NamedQuantity, Boolean> hiddenItems;
-	private final Queue<Integer> droppedItemQueue = EvictingQueue.create(16); // recently dropped items
-	private int lastUsedItem;
 	final Map<WorldPoint, Lootbeam> lootbeams = new HashMap<>();
 
 //	@Override
@@ -186,7 +178,6 @@ public class RainbowRaveGroundItemsPlugin
 		mouseManager.registerMouseListener(inputListener);
 		keyManager.registerKeyListener(inputListener);
 		executor.execute(this::reset);
-		lastUsedItem = -1;
 	}
 
 	@Subscribe
@@ -322,7 +313,7 @@ public class RainbowRaveGroundItemsPlugin
 			collectedGroundItems.put(tile.getWorldLocation(), item.getId(), groundItem);
 		}
 
-//		if (!config.onlyShowLoot())
+//		if (!config.onlyShowOwnItems())
 //		{
 //			notifyHighlightedItem(groundItem);
 //		}
@@ -376,49 +367,10 @@ public class RainbowRaveGroundItemsPlugin
 		handleLootbeam(tile.getWorldLocation());
 	}
 
-	@Subscribe
-	public void onNpcLootReceived(NpcLootReceived npcLootReceived)
-	{
-		Collection<ItemStack> items = npcLootReceived.getItems();
-		lootReceived(items, LootType.PVM);
-	}
-
-	@Subscribe
-	public void onPlayerLootReceived(PlayerLootReceived playerLootReceived)
-	{
-		Collection<ItemStack> items = playerLootReceived.getItems();
-		lootReceived(items, LootType.PVP);
-	}
-
 //	@Subscribe
 //	public void onClientTick(ClientTick event)
 //	{
 //	}
-
-	private void lootReceived(Collection<ItemStack> items, LootType lootType)
-	{
-		for (ItemStack itemStack : items)
-		{
-			WorldPoint location = WorldPoint.fromLocal(client, itemStack.getLocation());
-			GroundItem groundItem = collectedGroundItems.get(location, itemStack.getId());
-			if (groundItem != null)
-			{
-				groundItem.setLootType(lootType);
-
-//				if (config.onlyShowLoot())
-//				{
-//					notifyHighlightedItem(groundItem);
-//				}
-			}
-		}
-
-		// Since the loot can potentially be over multiple tiles, make sure to process lootbeams on all those tiles
-		items.stream()
-			.map(ItemStack::getLocation)
-			.map(l -> WorldPoint.fromLocal(client, l))
-			.distinct()
-			.forEach(this::handleLootbeam);
-	}
 
 	private GroundItem buildGroundItem(final Tile tile, final TileItem item)
 	{
@@ -427,8 +379,8 @@ public class RainbowRaveGroundItemsPlugin
 		final ItemComposition itemComposition = itemManager.getItemComposition(itemId);
 		final int realItemId = itemComposition.getNote() != -1 ? itemComposition.getLinkedNoteId() : itemId;
 		final int alchPrice = itemComposition.getHaPrice();
-		final boolean dropped = tile.getWorldLocation().equals(client.getLocalPlayer().getWorldLocation()) && droppedItemQueue.remove(itemId);
-		final boolean table = itemId == lastUsedItem && tile.getItemLayer().getHeight() > 0;
+		final int despawnTime = item.getDespawnTime() - client.getTickCount();
+		final int visibleTime = item.getVisibleTime() - client.getTickCount();
 
 		final GroundItem groundItem = GroundItem.builder()
 			.id(itemId)
@@ -439,9 +391,12 @@ public class RainbowRaveGroundItemsPlugin
 			.haPrice(alchPrice)
 			.height(tile.getItemLayer().getHeight())
 			.tradeable(itemComposition.isTradeable())
-			.lootType(dropped ? LootType.DROPPED : (table ? LootType.TABLE : LootType.UNKNOWN))
+			.ownership(item.getOwnership())
+			.isPrivate(item.isPrivate())
 			.spawnTime(Instant.now())
 			.stackable(itemComposition.isStackable())
+			.despawnTime(Duration.of(despawnTime, RSTimeUnit.GAME_TICKS))
+			.visibleTime(Duration.of(visibleTime, RSTimeUnit.GAME_TICKS))
 			.build();
 
 		// Update item price in case it is coins
@@ -610,22 +565,6 @@ public class RainbowRaveGroundItemsPlugin
 		}
 	}
 
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked menuOptionClicked)
-	{
-		if (menuOptionClicked.isItemOp() && menuOptionClicked.getMenuOption().equals("Drop"))
-		{
-			int itemId = menuOptionClicked.getItemId();
-			// Keep a queue of recently dropped items to better detect
-			// item spawns that are drops
-			droppedItemQueue.add(itemId);
-		}
-		else if (menuOptionClicked.getMenuAction() == MenuAction.WIDGET_TARGET_ON_GAME_OBJECT && client.getSelectedWidget().getId() == InterfaceID.INVENTORY)
-		{
-			lastUsedItem = client.getSelectedWidget().getItemId();
-		}
-	}
-
 	private void handleLootbeam(WorldPoint worldPoint)
 	{
 		/*
@@ -642,7 +581,7 @@ public class RainbowRaveGroundItemsPlugin
 		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
 		for (GroundItem groundItem : groundItems)
 		{
-			if ((config.onlyShowLoot() && !groundItem.isMine()))
+			if ((config.onlyShowOwnItems() && !groundItem.isMine()))
 			{
 				continue;
 			}

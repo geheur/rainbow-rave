@@ -24,11 +24,13 @@
  */
 package com.rainbowrave;
 
+import java.awt.Color;
+import java.time.Duration;
 import java.time.Instant;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.Data;
+import static net.runelite.api.TileItem.OWNERSHIP_OTHER;
 import net.runelite.api.coords.WorldPoint;
 
 @Data
@@ -45,11 +47,18 @@ class GroundItem
 	private int gePrice;
 	private int offset;
 	private boolean tradeable;
-	@Nonnull
-	private LootType lootType;
+	private int ownership;
+	private boolean isPrivate;
 	@Nullable
 	private Instant spawnTime;
 	private boolean stackable;
+	private Duration despawnTime;
+	private Duration visibleTime;
+
+	// cached values derived from config
+	boolean highlighted;
+	boolean hidden;
+	Color color;
 
 	int getHaPrice()
 	{
@@ -63,6 +72,12 @@ class GroundItem
 
 	boolean isMine()
 	{
-		return lootType != LootType.UNKNOWN;
+		return ownership != OWNERSHIP_OTHER;
+	}
+
+	void reset()
+	{
+		highlighted = hidden = false;
+		color = null;
 	}
 }
