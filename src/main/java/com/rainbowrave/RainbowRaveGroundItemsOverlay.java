@@ -50,6 +50,8 @@ import net.runelite.client.plugins.grounditems.GroundItemsConfig;
 import net.runelite.client.plugins.grounditems.config.DespawnTimerMode;
 import static net.runelite.client.plugins.grounditems.config.ItemHighlightMode.MENU;
 import static net.runelite.client.plugins.grounditems.config.ItemHighlightMode.NONE;
+
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
 import net.runelite.client.plugins.grounditems.config.PriceDisplayMode;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -171,7 +173,7 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		plugin.setHiddenBoxBounds(null);
 		plugin.setHighlightBoxBounds(null);
 
-		final boolean onlyShowLoot = config.onlyShowOwnItems();
+		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
 		final DespawnTimerMode groundItemTimers = config.groundItemTimers();
 		final boolean outline = config.textOutline();
 
@@ -180,7 +182,7 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 			final LocalPoint groundPoint = LocalPoint.fromWorld(client, item.getLocation());
 
 			if (groundPoint == null || localLocation.distanceTo(groundPoint) > MAX_DISTANCE
-				|| (onlyShowLoot && !item.isMine()))
+				|| (ownershipFilterMode == OwnershipFilterMode.TAKEABLE && !item.isMine()))
 			{
 				continue;
 			}

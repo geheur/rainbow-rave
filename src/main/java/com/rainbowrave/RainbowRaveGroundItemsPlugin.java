@@ -76,6 +76,7 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
 import net.runelite.client.plugins.grounditems.config.HighlightTier;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.RSTimeUnit;
@@ -581,7 +582,7 @@ public class RainbowRaveGroundItemsPlugin
 		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
 		for (GroundItem groundItem : groundItems)
 		{
-			if ((config.onlyShowOwnItems() && !groundItem.isMine()))
+			if ((config.ownershipFilterMode() == OwnershipFilterMode.TAKEABLE && !groundItem.isMine()))
 			{
 				continue;
 			}
