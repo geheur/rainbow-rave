@@ -53,13 +53,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.ItemID;
-import net.runelite.api.Tile;
-import net.runelite.api.TileItem;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameStateChanged;
@@ -76,6 +70,11 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
+import static net.runelite.api.TileItem.OWNERSHIP_GROUP;
+import static net.runelite.api.TileItem.OWNERSHIP_NONE;
+import static net.runelite.api.TileItem.OWNERSHIP_OTHER;
+import static net.runelite.api.TileItem.OWNERSHIP_SELF;
 import net.runelite.client.plugins.grounditems.config.HighlightTier;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.RSTimeUnit;
@@ -313,7 +312,7 @@ public class RainbowRaveGroundItemsPlugin
 			collectedGroundItems.put(tile.getWorldLocation(), item.getId(), groundItem);
 		}
 
-//		if (!config.onlyShowOwnItems())
+//		if (shouldDisplayItem(config.ownershipFilterMode(), groundItem.getOwnership(), client.getVarbitValue(Varbits.ACCOUNT_TYPE)))
 //		{
 //			notifyHighlightedItem(groundItem);
 //		}
@@ -579,9 +578,11 @@ public class RainbowRaveGroundItemsPlugin
 
 		int price = -1;
 		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
+		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
+		final int accountType = client.getVarbitValue(Varbits.ACCOUNT_TYPE);
 		for (GroundItem groundItem : groundItems)
 		{
-			if ((config.onlyShowOwnItems() && !groundItem.isMine()))
+			if (!shouldDisplayItem(ownershipFilterMode, groundItem.getOwnership(), accountType))
 			{
 				continue;
 			}
@@ -662,6 +663,24 @@ public class RainbowRaveGroundItemsPlugin
 		if (lootbeam != null)
 		{
 			lootbeam.remove();
+		}
+	}
+
+	/*
+	 * All      -> none | self | other | group
+	 * Drops    -> self | group
+	 * Takeable -> none | self | group | (if a main then other)
+	 */
+	boolean shouldDisplayItem(OwnershipFilterMode filterMode, int ownership, int accountType)
+	{
+		switch (filterMode)
+		{
+			case DROPS:
+				return ownership == OWNERSHIP_SELF || ownership == OWNERSHIP_GROUP;
+			case TAKEABLE:
+				return ownership != OWNERSHIP_OTHER || accountType == 0; // Mains can always take items
+			default:
+				return true;
 		}
 	}
 }
