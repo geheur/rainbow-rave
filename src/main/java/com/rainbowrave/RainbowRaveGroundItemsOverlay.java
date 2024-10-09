@@ -39,11 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
-import net.runelite.api.Client;
-import net.runelite.api.ItemID;
-import net.runelite.api.Perspective;
-import net.runelite.api.Player;
-import net.runelite.api.Point;
+
+import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
@@ -173,16 +170,17 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		plugin.setHiddenBoxBounds(null);
 		plugin.setHighlightBoxBounds(null);
 
-		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
 		final DespawnTimerMode groundItemTimers = config.groundItemTimers();
 		final boolean outline = config.textOutline();
+		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
+		final int accountType = client.getVarbitValue(Varbits.ACCOUNT_TYPE);
 
 		for (GroundItem item : groundItemList)
 		{
 			final LocalPoint groundPoint = LocalPoint.fromWorld(client, item.getLocation());
 
 			if (groundPoint == null || localLocation.distanceTo(groundPoint) > MAX_DISTANCE
-				|| (ownershipFilterMode == OwnershipFilterMode.TAKEABLE && !item.isMine()))
+				|| !plugin.shouldDisplayItem(ownershipFilterMode, item.getOwnership(), accountType))
 			{
 				continue;
 			}
