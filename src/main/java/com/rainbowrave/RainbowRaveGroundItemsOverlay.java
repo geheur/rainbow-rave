@@ -172,10 +172,11 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 		final boolean outline = config.textOutline();
 		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
 		final int accountType = client.getVarbitValue(Varbits.ACCOUNT_TYPE);
+		final WorldView worldView = client.getTopLevelWorldView();
 
 		for (GroundItem item : groundItemList)
 		{
-			final LocalPoint groundPoint = LocalPoint.fromWorld(client, item.getLocation());
+			final LocalPoint groundPoint = LocalPoint.fromWorld(worldView, item.getLocation());
 
 			if (groundPoint == null || localLocation.distanceTo(groundPoint) > MAX_DISTANCE
 				|| !plugin.shouldDisplayItem(ownershipFilterMode, item.getOwnership(), accountType))

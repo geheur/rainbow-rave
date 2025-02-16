@@ -35,6 +35,7 @@ import net.runelite.api.JagexColor;
 import net.runelite.api.Model;
 import net.runelite.api.ModelData;
 import net.runelite.api.RuneLiteObject;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
@@ -100,8 +101,9 @@ class Lootbeam
 		update();
 		runeLiteObject.setShouldLoop(true);
 
-		LocalPoint lp = LocalPoint.fromWorld(client, worldPoint);
-		runeLiteObject.setLocation(lp, client.getPlane());
+		WorldView worldView = client.getTopLevelWorldView();
+		LocalPoint lp = LocalPoint.fromWorld(worldView, worldPoint);
+		runeLiteObject.setLocation(lp, worldView.getPlane());
 
 		runeLiteObject.setActive(true);
 	}

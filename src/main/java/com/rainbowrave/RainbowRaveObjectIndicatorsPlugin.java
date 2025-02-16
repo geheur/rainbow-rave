@@ -51,6 +51,7 @@ import net.runelite.api.Scene;
 import net.runelite.api.Tile;
 import net.runelite.api.TileObject;
 import net.runelite.api.WallObject;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.DecorativeObjectDespawned;
 import net.runelite.api.events.DecorativeObjectSpawned;
@@ -172,7 +173,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 			// Reload points with new map regions
 
 			points.clear();
-			for (int regionId : client.getMapRegions())
+			for (int regionId : client.getTopLevelWorldView().getMapRegions())
 			{
 				// load points for region
 				final Set<ObjectPoint> regionPoints = loadPoints(regionId);
@@ -199,11 +200,12 @@ public class RainbowRaveObjectIndicatorsPlugin
 			return;
 		}
 
-		Scene scene = client.getScene();
+		WorldView wv = client.getTopLevelWorldView();
+		Scene scene = wv.getScene();
 		Tile[][][] tiles = scene.getTiles();
 		final int x = event.getParam0();
 		final int y = event.getParam1();
-		final int z = client.getPlane();
+		final int z = wv.getPlane();
 		final Tile tile = tiles[z][x][y];
 
 		TileObject object = findTileObject(tile, event.getId());

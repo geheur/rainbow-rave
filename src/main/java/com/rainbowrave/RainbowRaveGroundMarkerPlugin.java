@@ -42,6 +42,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.MenuAction;
 import net.runelite.api.Tile;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
@@ -113,7 +114,7 @@ public class RainbowRaveGroundMarkerPlugin
 	{
 		points.clear();
 
-		int[] regions = client.getMapRegions();
+		int[] regions = client.getTopLevelWorldView().getMapRegions();
 
 		if (regions == null)
 		{
@@ -151,7 +152,7 @@ public class RainbowRaveGroundMarkerPlugin
 	 *
 	 * @param points {@link GroundMarkerPoint}s to be converted to {@link ColorTileMarker}s
 	 * @return A collection of color tile markers, converted from the passed ground marker points, accounting for local
-	 *         instance points. See {@link WorldPoint#toLocalInstance(Client, WorldPoint)}
+	 *         instance points. See {@link WorldPoint#toLocalInstance(WorldView, WorldPoint)}
 	 */
 	private Collection<ColorTileMarker> translateToColorTileMarker(Collection<GroundMarkerPoint> points)
 	{
@@ -160,13 +161,14 @@ public class RainbowRaveGroundMarkerPlugin
 			return Collections.emptyList();
 		}
 
+		WorldView wv = client.getTopLevelWorldView();
 		return points.stream()
 			.map(point -> new ColorTileMarker(
 				WorldPoint.fromRegion(point.getRegionId(), point.getRegionX(), point.getRegionY(), point.getZ()),
 				point.getColor(), point.getLabel()))
 			.flatMap(colorTile ->
 			{
-				final Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client, colorTile.getWorldPoint());
+				final Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(wv, colorTile.getWorldPoint());
 				return localWorldPoints.stream().map(wp -> new ColorTileMarker(wp, colorTile.getColor(), colorTile.getLabel()));
 			})
 			.collect(Collectors.toList());
@@ -202,7 +204,7 @@ public class RainbowRaveGroundMarkerPlugin
 			return;
 		}
 
-		Tile target = client.getSelectedSceneTile();
+		Tile target = client.getTopLevelWorldView().getSelectedSceneTile();
 		if (target == null || !event.getMenuTarget().equals("Tile"))
 		{
 			return;

@@ -45,7 +45,6 @@ import net.runelite.client.plugins.groundmarkers.GroundMarkerConfig;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
 public class RainbowRaveGroundMarkerOverlay extends Overlay
@@ -66,7 +65,7 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 		this.rainbowRavePlugin = rainbowRavePlugin;
 		this.rainbowRaveConfig = rainbowRaveConfig;
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 
@@ -86,10 +85,11 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 		Stroke stroke = new BasicStroke((float) config.borderWidth());
 		try
 		{
+			int plane = client.getTopLevelWorldView().getPlane();
 			for (final ColorTileMarker point : points)
 			{
 				WorldPoint worldPoint = point.getWorldPoint();
-				if (worldPoint.getPlane() != client.getPlane())
+				if (worldPoint.getPlane() != plane)
 				{
 					continue;
 				}
@@ -131,7 +131,7 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 			return;
 		}
 
-		LocalPoint lp = LocalPoint.fromWorld(client, point);
+		LocalPoint lp = LocalPoint.fromWorld(client.getTopLevelWorldView(), point);
 		if (lp == null)
 		{
 			return;

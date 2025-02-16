@@ -39,7 +39,6 @@ import java.util.Locale;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
-import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
@@ -113,7 +112,7 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			}
 			if (rainbowRaveConfig.highlightOthers())
 			{
-				for (Player player : client.getPlayers())
+				for (Player player : client.getTopLevelWorldView().players())
 				{
 					if (player != client.getLocalPlayer())
 						renderNpcOverlay(graphics, plugin.highlightedPlayer(), player);
@@ -132,7 +131,7 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 		}
 
 		final WorldPoint respawnLocation = npc.getPossibleRespawnLocations().get(0);
-		final LocalPoint lp = LocalPoint.fromWorld(client, respawnLocation.getX(), respawnLocation.getY());
+		final LocalPoint lp = LocalPoint.fromWorld(npc.getWorldView(), respawnLocation.getX(), respawnLocation.getY());
 
 		if (lp == null)
 		{
@@ -141,7 +140,8 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 
 		final LocalPoint centerLp = new LocalPoint(
 			lp.getX() + Perspective.LOCAL_TILE_SIZE * (npc.getNpcSize() - 1) / 2,
-			lp.getY() + Perspective.LOCAL_TILE_SIZE * (npc.getNpcSize() - 1) / 2);
+			lp.getY() + Perspective.LOCAL_TILE_SIZE * (npc.getNpcSize() - 1) / 2,
+			npc.getWorldView());
 
 		final Polygon poly = Perspective.getCanvasTileAreaPoly(client, centerLp, npc.getNpcSize());
 		renderPoly(graphics, config.highlightColor(), config.fillColor(), poly);
@@ -206,13 +206,14 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 
 		if (highlightedNpc.isTrueTile())
 		{
-			LocalPoint lp = LocalPoint.fromWorld(client, actor.getWorldLocation()); // centered on sw tile
+			LocalPoint lp = LocalPoint.fromWorld(actor.getWorldView(), actor.getWorldLocation()); // centered on sw tile
 			if (lp != null)
 			{
 				int size = npcComposition == null ? 1 : npcComposition.getSize();
 				final LocalPoint centerLp = new LocalPoint(
 					lp.getX() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2,
-					lp.getY() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2);
+					lp.getY() + Perspective.LOCAL_TILE_SIZE * (size - 1) / 2,
+					actor.getWorldView());
 				Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, centerLp, size);
 				renderPoly(graphics, borderColor, fillColor, tilePoly);
 			}
@@ -226,13 +227,13 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 			int x = lp.getX() - ((size - 1) * Perspective.LOCAL_TILE_SIZE / 2);
 			int y = lp.getY() - ((size - 1) * Perspective.LOCAL_TILE_SIZE / 2);
 
-			Polygon southWestTilePoly = Perspective.getCanvasTilePoly(client, new LocalPoint(x, y));
+			Polygon southWestTilePoly = Perspective.getCanvasTilePoly(client, new LocalPoint(x, y, actor.getWorldView()));
 			renderPoly(graphics, borderColor, fillColor, southWestTilePoly);
 		}
 
 		if (highlightedNpc.isSwTrueTile())
 		{
-			LocalPoint lp = LocalPoint.fromWorld(client, actor.getWorldLocation());
+			LocalPoint lp = LocalPoint.fromWorld(actor.getWorldView(), actor.getWorldLocation());
 			if (lp != null)
 			{
 				Polygon tilePoly = Perspective.getCanvasTilePoly(client, lp);
