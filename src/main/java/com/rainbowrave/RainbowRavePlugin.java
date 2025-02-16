@@ -353,7 +353,7 @@ public class RainbowRavePlugin extends Plugin
 	{
 		if(config.dukeRave())
 		{
-			for (NPC npc: client.getNpcs())
+			for (NPC npc : client.getTopLevelWorldView().npcs())
 			{
 				if(npc.getId()>=12199 && npc.getId() <= 12201)
 				{
@@ -380,7 +380,7 @@ public class RainbowRavePlugin extends Plugin
 		}
 		if (config.recolorScytheSwings())
 		{
-			for (GraphicsObject graphicsObject : client.getGraphicsObjects())
+			for (GraphicsObject graphicsObject : client.getTopLevelWorldView().getGraphicsObjects())
 			{
 				if (
 					scytheTrailIds.contains(graphicsObject.getId()) ||

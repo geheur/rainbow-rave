@@ -42,7 +42,6 @@ import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
@@ -65,7 +64,7 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 		this.rainbowRaveConfig = rainbowRaveConfig;
 		this.rainbowRavePlugin = rainbowRavePlugin;
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 
@@ -73,12 +72,13 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 	public Dimension render(Graphics2D graphics)
 	{
 		Stroke stroke = new BasicStroke((float) config.borderWidth());
+		int plane = client.getTopLevelWorldView().getPlane();
 		for (ColorTileObject colorTileObject : plugin.getObjects())
 		{
 			TileObject object = colorTileObject.getTileObject();
 			Color color = rainbowRavePlugin.getColor(colorTileObject.hashCode());
 
-			if (object.getPlane() != client.getPlane())
+			if (object.getPlane() != plane)
 			{
 				continue;
 			}

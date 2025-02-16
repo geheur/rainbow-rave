@@ -52,6 +52,7 @@ import net.runelite.api.GraphicsObject;
 import net.runelite.api.MenuAction;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -219,9 +220,9 @@ public class RainbowRaveNpcIndicatorsPlugin
 			return;
 		}
 
+		WorldView worldView = client.getTopLevelWorldView();
 		final int id = click.getId();
-		final NPC[] cachedNPCs = client.getCachedNPCs();
-		final NPC npc = cachedNPCs[id];
+		final NPC npc = worldView.npcs().byIndex(id);
 
 		if (npc == null || npc.getName() == null)
 		{
@@ -242,7 +243,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 			}
 			else
 			{
-				if (!client.isInInstancedRegion())
+				if (!worldView.isInstance())
 				{
 					memorizeNpc(npc);
 					npcTags.add(id);
@@ -271,10 +272,11 @@ public class RainbowRaveNpcIndicatorsPlugin
 			return;
 		}
 
+		WorldView worldView = client.getTopLevelWorldView();
 		if (highlightMatchesNPCName(npcName))
 		{
 			highlightedNpcs.put(npc, highlightedNpc(npc));
-			if (!client.isInInstancedRegion())
+			if (!worldView.isInstance())
 			{
 				memorizeNpc(npc);
 				spawnedNpcsThisTick.add(npc);
@@ -288,7 +290,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 			if (highlightedNpc != null)
 			{
 				highlightedNpcs.put(npc, highlightedNpc);
-				if (!client.isInInstancedRegion())
+				if (!worldView.isInstance())
 				{
 					memorizeNpc(npc);
 					spawnedNpcsThisTick.add(npc);
@@ -447,8 +449,9 @@ public class RainbowRaveNpcIndicatorsPlugin
 			return;
 		}
 
+		WorldView worldView = client.getTopLevelWorldView();
 		outer:
-		for (NPC npc : client.getNpcs())
+		for (NPC npc : worldView.npcs())
 		{
 			final String npcName = npc.getName();
 
@@ -465,7 +468,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 
 			if (highlightMatchesNPCName(npcName))
 			{
-				if (!client.isInInstancedRegion())
+				if (!worldView.isInstance())
 				{
 					memorizeNpc(npc);
 				}
@@ -478,7 +481,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 				HighlightedNpc highlightedNpc = predicate.apply(npc);
 				if (highlightedNpc != null)
 				{
-					if (!client.isInInstancedRegion())
+					if (!worldView.isInstance())
 					{
 						memorizeNpc(npc);
 					}

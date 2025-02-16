@@ -30,12 +30,16 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 
 class MemorizedNpc
 {
 	@Getter
 	private int npcIndex;
+
+	@Getter
+	private WorldView worldView;
 
 	@Getter
 	private String npcName;
@@ -65,6 +69,7 @@ class MemorizedNpc
 	{
 		this.npcName = npc.getName();
 		this.npcIndex = npc.getIndex();
+		this.worldView = npc.getWorldView();
 		this.possibleRespawnLocations = new ArrayList<>();
 		this.respawnTime = -1;
 		this.diedOnTick = -1;

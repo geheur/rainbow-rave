@@ -32,7 +32,6 @@ import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 
 class RainbowRaveMouseTrailOverlay extends Overlay
 {
@@ -46,7 +45,7 @@ class RainbowRaveMouseTrailOverlay extends Overlay
         this.rainbowRavePlugin = rainbowRavePlugin;
         this.rainbowRaveConfig = rainbowRaveConfig;
         setPosition(OverlayPosition.DYNAMIC);
-        setPriority(OverlayPriority.HIGH);
+        setPriority(Overlay.PRIORITY_HIGH);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
     }
 

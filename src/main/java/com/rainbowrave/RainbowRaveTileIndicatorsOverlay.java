@@ -33,11 +33,11 @@ import java.awt.Stroke;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.api.Perspective;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.util.ColorUtil;
 
@@ -54,18 +54,19 @@ public class RainbowRaveTileIndicatorsOverlay extends Overlay
 		this.rainbowRavePlugin = rainbowRavePlugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
-		setPriority(OverlayPriority.MED);
+		setPriority(Overlay.PRIORITY_MED);
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		WorldView wv = client.getTopLevelWorldView();
 		if (plugin.highlightHoveredTile)
 		{
 			// If we have tile "selected" render it
-			if (client.getSelectedSceneTile() != null)
+			if (wv.getSelectedSceneTile() != null)
 			{
-				renderTile(graphics, client.getSelectedSceneTile().getLocalLocation(), rainbowRavePlugin.getColor(0), plugin.hoveredTileBorderWidth, plugin.hoveredTileFillColor, plugin.hoveredTileCornersOnly, plugin.hoveredTileCornerSize);
+				renderTile(graphics, wv.getSelectedSceneTile().getLocalLocation(), rainbowRavePlugin.getColor(0), plugin.hoveredTileBorderWidth, plugin.hoveredTileFillColor, plugin.hoveredTileCornersOnly, plugin.hoveredTileCornerSize);
 			}
 		}
 
@@ -76,7 +77,7 @@ public class RainbowRaveTileIndicatorsOverlay extends Overlay
 
 		if (plugin.highlightCurrentTile)
 		{
-			final LocalPoint playerPosLocal = LocalPoint.fromWorld(client, plugin.getLastPlayerPosition());
+			final LocalPoint playerPosLocal = LocalPoint.fromWorld(wv, plugin.getLastPlayerPosition());
 			if (playerPosLocal == null)
 			{
 				return null;
