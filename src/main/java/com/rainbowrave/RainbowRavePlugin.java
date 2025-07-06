@@ -331,7 +331,7 @@ public class RainbowRavePlugin extends Plugin
 		if (highlighterPredicate != null) rainbowRaveNpcIndicatorsPlugin.unregisterHighlighter(highlighterPredicate);
 		highlighterPredicate = f;
 		rainbowRaveNpcIndicatorsPlugin.registerHighlighter(highlighterPredicate);
-		rainbowRaveNpcIndicatorsPlugin.rebuild();
+		clientThread.invoke(rainbowRaveNpcIndicatorsPlugin::rebuild);
 	}
 
 	public Color getColor(int hashCode)
