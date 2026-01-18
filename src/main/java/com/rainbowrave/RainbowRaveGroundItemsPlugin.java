@@ -197,10 +197,16 @@ public class RainbowRaveGroundItemsPlugin
 //		overlayManager.remove(overlay);
 		mouseManager.unregisterMouseListener(inputListener);
 		keyManager.unregisterKeyListener(inputListener);
-		highlightedItems.invalidateAll();
-		highlightedItems = null;
-		hiddenItems.invalidateAll();
-		hiddenItems = null;
+		if (highlightedItems != null)
+		{
+			highlightedItems.invalidateAll();
+			highlightedItems = null;
+		}
+		if (hiddenItems != null)
+		{
+			hiddenItems.invalidateAll();
+			hiddenItems = null;
+		}
 		hiddenItemList = null;
 		highlightedItemsList = null;
 		collectedGroundItems.clear();
