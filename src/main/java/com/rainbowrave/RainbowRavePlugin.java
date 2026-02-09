@@ -364,8 +364,8 @@ public class RainbowRavePlugin extends Plugin
 
 		if (config.recolorLootBeams())
 	{
-		boolean colorHighlightedItems = config.colorHighlightedGroundItems();
-			int tierOrdinal = config.whichGroundItemsToColor().highlightTierRelativeOrdinal;
+		boolean colorHighlightedItems = config.getGroundItemsHighlightedItemsLootbeam();
+			int tierOrdinal = config.getGroundItemsLootbeamTier().ordinal();
 			for (Lootbeam value : rainbowRaveGroundItemsPlugin.lootbeams.values())
 			{
 				if (
