@@ -53,7 +53,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
-import net.runelite.api.*;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.ItemComposition;
+import net.runelite.api.ItemID;
+import net.runelite.api.Tile;
+import net.runelite.api.TileItem;
+import static net.runelite.api.TileItem.OWNERSHIP_GROUP;
+import static net.runelite.api.TileItem.OWNERSHIP_OTHER;
+import static net.runelite.api.TileItem.OWNERSHIP_SELF;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameStateChanged;
@@ -63,19 +73,17 @@ import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.ConfigProfile;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
-import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
-import static net.runelite.api.TileItem.OWNERSHIP_GROUP;
-import static net.runelite.api.TileItem.OWNERSHIP_NONE;
-import static net.runelite.api.TileItem.OWNERSHIP_OTHER;
-import static net.runelite.api.TileItem.OWNERSHIP_SELF;
 import net.runelite.client.plugins.grounditems.config.HighlightTier;
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.RSTimeUnit;
 import net.runelite.client.util.Text;
@@ -172,11 +180,19 @@ public class RainbowRaveGroundItemsPlugin
 //	@Override
 	protected void startUp()
 	{
+		lastProfile = configManager.getProfile();
 		groundItemsLootBeamChange(false, false, true);
 //		overlayManager.add(overlay);
 		mouseManager.registerMouseListener(inputListener);
 		keyManager.registerKeyListener(inputListener);
 		executor.execute(this::reset);
+	}
+
+	@Subscribe
+	public void onProfileChanged(ProfileChanged e) {
+		groundItemsLootBeamChange(false, false, true);
+		lastProfile = configManager.getProfile();
+//		System.out.println("profile changed " + lastProfile.getId() + " " + Thread.currentThread().getName());
 	}
 
 	@Subscribe
@@ -215,10 +231,19 @@ public class RainbowRaveGroundItemsPlugin
 
 	private boolean ignoreConfigChange = false;
 
+	private ConfigProfile lastProfile = null;
+
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
 		if (ignoreConfigChange) return;
+
+		if (lastProfile.getId() != configManager.getProfile().getId()) {
+			// this is a profile change, config is in an invalid state and should not be read or written.
+//			System.out.println("profile change " + event.getGroup() + " " + event.getKey() + " " + Thread.currentThread().getName());
+			return;
+		}
+//		System.out.println("config change " + event.getGroup() + " " + event.getKey() + " " + Thread.currentThread().getName());
 
 		if (event.getGroup().equals(GROUND_ITEMS_CONFIG_GROUP))
 		{
@@ -252,6 +277,14 @@ public class RainbowRaveGroundItemsPlugin
 
 	private void groundItemsLootBeamChange(boolean tierChanged, boolean highlightedChanged, boolean turningOnRecolorLootBeams)
 	{
+		if (turningOnRecolorLootBeams) {
+			// prevent this plugin from mistaking overridden ground items settings as natural settings. This is an issue if there is an unclean shutdown or profile change, as this does not restore ground items config.
+			// in future, it would be better to use the status of the backed-up settings and null them when not overriding ground items settings, but currently I do not null these so I have to add this new flag in to make this work nicely for existing users.
+			// boolean.parse is intentional here, passing Boolean.class results in NPE if null value. I want null to be false.
+			boolean alreadyModified = Boolean.parseBoolean(configManager.getConfiguration(RainbowRavePlugin.GROUP, "groundItemsLootbeamSettingsModified"));
+			if (alreadyModified) return;
+		}
+
 		if (rainbowRaveConfig.recolorLootBeams())
 		{
 			if (!turningOnRecolorLootBeams && SwingUtilities.isEventDispatchThread()) // Changes from profile changes happen on the executor thread, only show the message when it happens on the swing thread.
@@ -275,6 +308,8 @@ public class RainbowRaveGroundItemsPlugin
 			}
 			ignoreConfigChange = false;
 
+			configManager.setConfiguration(RainbowRavePlugin.GROUP, "groundItemsLootbeamSettingsModified", true);
+
 			executor.execute(this::reset);
 		}
 	}
@@ -289,6 +324,7 @@ public class RainbowRaveGroundItemsPlugin
 		ignoreConfigChange = false;
 
 		executor.execute(this::reset);
+		configManager.setConfiguration(RainbowRavePlugin.GROUP, "groundItemsLootbeamSettingsModified", false);
 	}
 
 	@Subscribe
