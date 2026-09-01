@@ -77,7 +77,7 @@ public class RainbowRaveTileIndicatorsOverlay extends Overlay
 
 		if (plugin.highlightCurrentTile)
 		{
-			final LocalPoint playerPosLocal = LocalPoint.fromWorld(wv, plugin.getLastPlayerPosition());
+			final LocalPoint playerPosLocal = LocalPoint.fromWorld(wv, client.getLocalPlayer().getWorldLocation());
 			if (playerPosLocal == null)
 			{
 				return null;

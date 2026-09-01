@@ -46,7 +46,7 @@ public class RainbowRaveTileIndicatorsPlugin
 	@Inject private ConfigManager configManager;
 	@Inject private RainbowRaveConfig rainbowRaveConfig;
 
-	@Getter private WorldPoint lastPlayerPosition = new WorldPoint(0, 0, 0);
+	private WorldPoint lastPlayerPosition = new WorldPoint(0, 0, 0);
 	@Getter private int lastTickPlayerMoved = 0;
 	@Getter private long lastTimePlayerStoppedMoving = 0;
 
