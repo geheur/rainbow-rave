@@ -84,7 +84,7 @@ public class RainbowRaveTileIndicatorsOverlay extends Overlay
 			}
 
 			Color rainbowColor = rainbowRavePlugin.getColor(0);
-			Color color = ColorUtil.colorWithAlpha(rainbowColor, plugin.highlightCurrentColor.getAlpha());
+			Color color = rainbowColor;
 			Color fillColor = plugin.recolorFill ? ColorUtil.colorWithAlpha(rainbowColor, plugin.currentTileFillColor.getAlpha()) : plugin.currentTileFillColor;
 			// When not fading out the current tile, or when it has been 1 game tick or less since the player last
 			// moved, draw the tile at full opacity. When using fadeout, drawing the indicator at full opacity for 1
