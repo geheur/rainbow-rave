@@ -509,7 +509,7 @@ public class RainbowRaveGroundItemsPlugin
 //	{
 //	}
 
-	Optional<Color> getHighlighted(NamedQuantity item, int gePrice, int haPrice)
+	Optional<Color> getHighlighted(NamedQuantity item, long gePrice, int haPrice)
 	{
 		if (TRUE.equals(highlightedItems.getUnchecked(item)))
 		{
@@ -522,7 +522,7 @@ public class RainbowRaveGroundItemsPlugin
 			return null;
 		}
 
-		final int price = getValueByMode(gePrice, haPrice);
+		final long price = getValueByMode(gePrice, haPrice);
 		if (price > config.insaneValuePrice())
 		{
 			return colorForTier(INSANE, item);
@@ -551,7 +551,7 @@ public class RainbowRaveGroundItemsPlugin
 		return rainbowRaveConfig.whichGroundItemsToColor().compareTo(tier) >= 0 ? Optional.of(rainbowRavePlugin.getColor(item.getName().hashCode())) : Optional.empty();
 	}
 
-	Optional<Color> getHidden(NamedQuantity item, int gePrice, int haPrice, boolean isTradeable)
+	Optional<Color> getHidden(NamedQuantity item, long gePrice, int haPrice, boolean isTradeable)
 	{
 		final boolean isExplicitHidden = TRUE.equals(hiddenItems.getUnchecked(item));
 		final boolean isExplicitHighlight = TRUE.equals(highlightedItems.getUnchecked(item));
@@ -593,7 +593,7 @@ public class RainbowRaveGroundItemsPlugin
 //	{
 //	}
 
-	private int getValueByMode(int gePrice, int haPrice)
+	private long getValueByMode(long gePrice, int haPrice)
 	{
 		switch (config.valueCalculationMode())
 		{
@@ -618,7 +618,7 @@ public class RainbowRaveGroundItemsPlugin
 			return;
 		}
 
-		int price = -1;
+		long price = -1;
 		Collection<GroundItem> groundItems = collectedGroundItems.row(worldPoint).values();
 		final OwnershipFilterMode ownershipFilterMode = config.ownershipFilterMode();
 		final int accountType = client.getVarbitValue(Varbits.ACCOUNT_TYPE);
@@ -647,7 +647,7 @@ public class RainbowRaveGroundItemsPlugin
 				continue;
 			}
 
-			int itemPrice = getValueByMode(groundItem.getGePrice(), groundItem.getHaPrice());
+			long itemPrice = getValueByMode(groundItem.getGePrice(), groundItem.getHaPrice());
 			price = Math.max(itemPrice, price);
 		}
 

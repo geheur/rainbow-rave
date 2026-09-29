@@ -256,7 +256,7 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 				}
 				else if (displayMode != PriceDisplayMode.OFF)
 				{
-					final int price = displayMode == PriceDisplayMode.GE
+					final long price = displayMode == PriceDisplayMode.GE
 						? item.getGePrice()
 						: item.getHaPrice();
 
