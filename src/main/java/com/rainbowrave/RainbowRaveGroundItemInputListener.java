@@ -44,8 +44,7 @@ public class RainbowRaveGroundItemInputListener extends MouseAdapter implements 
 	@Inject
 	private RainbowRaveGroundItemsPlugin plugin;
 
-	@Inject
-	private GroundItemsConfig config;
+	GroundItemsConfig config;
 
 	@Override
 	public void keyTyped(KeyEvent e)

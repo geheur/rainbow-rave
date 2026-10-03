@@ -54,11 +54,11 @@ class RainbowRaveObjectIndicatorsOverlay extends Overlay
 	private final ModelOutlineRenderer modelOutlineRenderer;
 	private final RainbowRavePlugin rainbowRavePlugin;
 
-	public RainbowRaveObjectIndicatorsOverlay(Client client, ObjectIndicatorsConfig config, RainbowRaveObjectIndicatorsPlugin plugin,
+	public RainbowRaveObjectIndicatorsOverlay(Client client, RainbowRaveObjectIndicatorsPlugin plugin,
 											   ModelOutlineRenderer modelOutlineRenderer, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig)
 	{
 		this.client = client;
-		this.config = config;
+		this.config = rainbowRavePlugin.configManager.getConfig(ObjectIndicatorsConfig.class);
 		this.plugin = plugin;
 		this.modelOutlineRenderer = modelOutlineRenderer;
 		this.rainbowRaveConfig = rainbowRaveConfig;

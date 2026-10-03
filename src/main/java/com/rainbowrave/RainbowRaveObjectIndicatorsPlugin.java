@@ -89,7 +89,6 @@ public class RainbowRaveObjectIndicatorsPlugin
 	@Inject
 	private OverlayManager overlayManager;
 
-	@Inject
 	private ObjectIndicatorsConfig config;
 
 	@Inject
@@ -103,6 +102,7 @@ public class RainbowRaveObjectIndicatorsPlugin
 
 	protected void startUp()
 	{
+		config = configManager.getConfig(ObjectIndicatorsConfig.class);
 	}
 
 	protected void shutDown()

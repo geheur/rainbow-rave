@@ -39,7 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.ItemID;
+import net.runelite.api.Perspective;
+import net.runelite.api.Player;
+import net.runelite.api.Point;
+import net.runelite.api.Varbits;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.plugins.grounditems.GroundItemsConfig;
@@ -81,13 +87,13 @@ public class RainbowRaveGroundItemsOverlay extends Overlay
 	private final Map<WorldPoint, Integer> offsetMap = new HashMap<>();
 
 	@Inject
-	public RainbowRaveGroundItemsOverlay(Client client, RainbowRaveGroundItemsPlugin plugin, GroundItemsConfig config)
+	public RainbowRaveGroundItemsOverlay(Client client, RainbowRaveGroundItemsPlugin plugin, RainbowRavePlugin rainbowRavePlugin)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.client = client;
 		this.plugin = plugin;
-		this.config = config;
+		this.config = rainbowRavePlugin.configManager.getConfig(GroundItemsConfig.class);
 	}
 
 	@Override

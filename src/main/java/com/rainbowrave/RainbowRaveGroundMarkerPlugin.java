@@ -71,7 +71,6 @@ public class RainbowRaveGroundMarkerPlugin
 	@Inject
 	private Client client;
 
-	@Inject
 	private GroundMarkerConfig config;
 
 	@Inject
@@ -176,6 +175,7 @@ public class RainbowRaveGroundMarkerPlugin
 
 	public void startUp()
 	{
+		config = configManager.getConfig(GroundMarkerConfig.class);
 		loadPoints();
 	}
 

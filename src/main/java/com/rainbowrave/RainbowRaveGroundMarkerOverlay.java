@@ -57,10 +57,10 @@ public class RainbowRaveGroundMarkerOverlay extends Overlay
 	private final RainbowRaveConfig rainbowRaveConfig;
 	private final RainbowRavePlugin rainbowRavePlugin;
 
-	public RainbowRaveGroundMarkerOverlay(Client client, GroundMarkerConfig config, RainbowRaveGroundMarkerPlugin plugin, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig)
+	public RainbowRaveGroundMarkerOverlay(Client client, RainbowRaveGroundMarkerPlugin plugin, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig)
 	{
 		this.client = client;
-		this.config = config;
+		this.config = rainbowRavePlugin.configManager.getConfig(GroundMarkerConfig.class);
 		this.plugin = plugin;
 		this.rainbowRavePlugin = rainbowRavePlugin;
 		this.rainbowRaveConfig = rainbowRaveConfig;

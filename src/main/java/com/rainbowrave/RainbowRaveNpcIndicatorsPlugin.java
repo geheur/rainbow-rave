@@ -91,7 +91,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 	private static final String STYLE_OUTLINE = "outline";
 
 	@Inject private Client client;
-	@Inject private NpcIndicatorsConfig config;
+	private NpcIndicatorsConfig config;
 	@Inject private OverlayManager overlayManager;
 	@Inject private ClientThread clientThread;
 	@Inject private NpcUtil npcUtil;
@@ -164,6 +164,7 @@ public class RainbowRaveNpcIndicatorsPlugin
 
 	protected void startUp()
 	{
+		config = configManager.getConfig(NpcIndicatorsConfig.class);
 		clientThread.invoke(() ->
 		{
 			skipNextSpawnCheck = true;

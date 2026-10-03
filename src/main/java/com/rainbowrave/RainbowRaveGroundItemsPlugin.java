@@ -149,7 +149,6 @@ public class RainbowRaveGroundItemsPlugin
 	@Inject
 	private OverlayManager overlayManager;
 
-	@Inject
 	private GroundItemsConfig config;
 
 //	@Inject
@@ -180,9 +179,11 @@ public class RainbowRaveGroundItemsPlugin
 //	@Override
 	protected void startUp()
 	{
+		config = configManager.getConfig(GroundItemsConfig.class);
 		lastProfile = configManager.getProfile();
 		groundItemsLootBeamChange(false, false, true);
 //		overlayManager.add(overlay);
+		inputListener.config = configManager.getConfig(GroundItemsConfig.class);
 		mouseManager.registerMouseListener(inputListener);
 		keyManager.registerKeyListener(inputListener);
 		executor.execute(this::reset);

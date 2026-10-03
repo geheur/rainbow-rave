@@ -74,11 +74,11 @@ public class RainbowRaveNpcSceneOverlay extends Overlay
 
 	private final RainbowRavePlugin rainbowRavePlugin;
 
-	RainbowRaveNpcSceneOverlay(Client client, NpcIndicatorsConfig config, RainbowRaveNpcIndicatorsPlugin plugin,
+	RainbowRaveNpcSceneOverlay(Client client, RainbowRaveNpcIndicatorsPlugin plugin,
 							   ModelOutlineRenderer modelOutlineRenderer, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig)
 	{
 		this.client = client;
-		this.config = config;
+		this.config = rainbowRavePlugin.configManager.getConfig(NpcIndicatorsConfig.class);
 		this.plugin = plugin;
 		this.modelOutlineRenderer = modelOutlineRenderer;
 		this.rainbowRavePlugin = rainbowRavePlugin;

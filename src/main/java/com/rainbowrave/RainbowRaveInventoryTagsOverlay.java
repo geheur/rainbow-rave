@@ -46,11 +46,11 @@ public class RainbowRaveInventoryTagsOverlay extends WidgetItemOverlay
 
 	private ConfigManager configManager;
 
-	public RainbowRaveInventoryTagsOverlay(ItemManager itemManager, RainbowRavePlugin rainbowRavePlugin, InventoryTagsConfig config, RainbowRaveConfig rainbowRaveConfig, ConfigManager configManager)
+	public RainbowRaveInventoryTagsOverlay(ItemManager itemManager, RainbowRavePlugin rainbowRavePlugin, RainbowRaveConfig rainbowRaveConfig, ConfigManager configManager)
 	{
 		this.itemManager = itemManager;
 		this.rainbowRavePlugin = rainbowRavePlugin;
-		this.config = config;
+		this.config = configManager.getConfig(InventoryTagsConfig.class);
 		this.rainbowRaveConfig = rainbowRaveConfig;
 		this.configManager = configManager;
 		showOnEquipment();

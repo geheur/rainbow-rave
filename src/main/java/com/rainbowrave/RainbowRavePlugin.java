@@ -45,18 +45,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.grounditems.GroundItemsConfig;
-import net.runelite.client.plugins.grounditems.GroundItemsPlugin;
-import net.runelite.client.plugins.groundmarkers.GroundMarkerConfig;
-import net.runelite.client.plugins.groundmarkers.GroundMarkerPlugin;
-import net.runelite.client.plugins.inventorytags.InventoryTagsConfig;
-import net.runelite.client.plugins.inventorytags.InventoryTagsPlugin;
-import net.runelite.client.plugins.npchighlight.NpcIndicatorsConfig;
-import net.runelite.client.plugins.npchighlight.NpcIndicatorsPlugin;
-import net.runelite.client.plugins.objectindicators.ObjectIndicatorsConfig;
-import net.runelite.client.plugins.objectindicators.ObjectIndicatorsPlugin;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
@@ -66,11 +55,6 @@ import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 	name = "Rainbow Rave",
 	tags = {"loot", "beam", "ground", "item", "tile", "indicator", "npc", "object", "inventory", "tag", "scythe"}
 )
-@PluginDependency(NpcIndicatorsPlugin.class)
-@PluginDependency(GroundMarkerPlugin.class)
-@PluginDependency(ObjectIndicatorsPlugin.class)
-@PluginDependency(InventoryTagsPlugin.class)
-@PluginDependency(GroundItemsPlugin.class)
 public class RainbowRavePlugin extends Plugin
 {
 	public static final String GROUP = "rainbow_rave";
@@ -88,15 +72,9 @@ public class RainbowRavePlugin extends Plugin
 	private ModelOutlineRenderer modelOutlineRenderer;
 
 	@Inject
-	private NpcIndicatorsConfig npcIndicatorsConfig;
-
-	@Inject
 	private RainbowRaveNpcIndicatorsPlugin rainbowRaveNpcIndicatorsPlugin;
 
 	private RainbowRaveNpcSceneOverlay rainbowRaveNpcSceneOverlay;
-
-	@Inject
-	private GroundMarkerConfig groundMarkerConfig;
 
 	@Inject
 	private RainbowRaveGroundMarkerPlugin rainbowRaveGroundMarkerPlugin;
@@ -104,20 +82,11 @@ public class RainbowRavePlugin extends Plugin
 	private RainbowRaveGroundMarkerOverlay rainbowRaveGroundMarkerOverlay;
 
 	@Inject
-	private ObjectIndicatorsConfig objectIndicatorsConfig;
-
-	@Inject
 	private RainbowRaveObjectIndicatorsPlugin rainbowRaveObjectIndicatorsPlugin;
 
 	private RainbowRaveObjectIndicatorsOverlay rainbowRaveObjectIndicatorsOverlay;
 
 	private RainbowRaveInventoryTagsOverlay rainbowRaveInventoryTagsOverlay;
-
-	@Inject
-	private InventoryTagsConfig inventoryTagsConfig;
-
-	@Inject
-	private GroundItemsConfig groundItemsConfig;
 
 	@Inject
 	private RainbowRaveGroundItemsPlugin rainbowRaveGroundItemsPlugin;
@@ -141,7 +110,7 @@ public class RainbowRavePlugin extends Plugin
 	private ItemManager itemManager;
 
 	@Inject
-	private ConfigManager configManager;
+	ConfigManager configManager;
 
 	@Inject
 	private ClientThread clientThread;
@@ -150,21 +119,21 @@ public class RainbowRavePlugin extends Plugin
 	protected void startUp()
 	{
 		if (rainbowRaveGroundMarkerOverlay == null) {
-			rainbowRaveGroundMarkerOverlay = new RainbowRaveGroundMarkerOverlay(client, groundMarkerConfig, rainbowRaveGroundMarkerPlugin, this, config);
+			rainbowRaveGroundMarkerOverlay = new RainbowRaveGroundMarkerOverlay(client, rainbowRaveGroundMarkerPlugin, this, config);
 		}
 		rainbowRaveGroundMarkerPlugin.startUp();
 		overlayManager.add(rainbowRaveGroundMarkerOverlay);
 		eventBus.register(rainbowRaveGroundMarkerPlugin);
 
 		if (rainbowRaveObjectIndicatorsOverlay == null) {
-			rainbowRaveObjectIndicatorsOverlay = new RainbowRaveObjectIndicatorsOverlay(client, objectIndicatorsConfig, rainbowRaveObjectIndicatorsPlugin, modelOutlineRenderer, this, config);
+			rainbowRaveObjectIndicatorsOverlay = new RainbowRaveObjectIndicatorsOverlay(client, rainbowRaveObjectIndicatorsPlugin, modelOutlineRenderer, this, config);
 		}
 		rainbowRaveObjectIndicatorsPlugin.startUp();
 		overlayManager.add(rainbowRaveObjectIndicatorsOverlay);
 		eventBus.register(rainbowRaveObjectIndicatorsPlugin);
 
 		if (rainbowRaveNpcSceneOverlay == null) {
-			rainbowRaveNpcSceneOverlay = new RainbowRaveNpcSceneOverlay(client, npcIndicatorsConfig, rainbowRaveNpcIndicatorsPlugin, modelOutlineRenderer, this, config);
+			rainbowRaveNpcSceneOverlay = new RainbowRaveNpcSceneOverlay(client, rainbowRaveNpcIndicatorsPlugin, modelOutlineRenderer, this, config);
 		}
 		updateNpcHighlighterWithConfigSettings();
 		rainbowRaveNpcIndicatorsPlugin.startUp();
@@ -172,12 +141,12 @@ public class RainbowRavePlugin extends Plugin
 		eventBus.register(rainbowRaveNpcIndicatorsPlugin);
 
 		if (rainbowRaveInventoryTagsOverlay == null) {
-			rainbowRaveInventoryTagsOverlay = new RainbowRaveInventoryTagsOverlay(itemManager, this, inventoryTagsConfig, config, configManager);
+			rainbowRaveInventoryTagsOverlay = new RainbowRaveInventoryTagsOverlay(itemManager, this, config, configManager);
 		}
 		overlayManager.add(rainbowRaveInventoryTagsOverlay);
 
 		if (rainbowRaveGroundItemsOverlay == null) {
-			rainbowRaveGroundItemsOverlay = new RainbowRaveGroundItemsOverlay(client, rainbowRaveGroundItemsPlugin, groundItemsConfig);
+			rainbowRaveGroundItemsOverlay = new RainbowRaveGroundItemsOverlay(client, rainbowRaveGroundItemsPlugin, this);
 		}
 		overlayManager.add(rainbowRaveGroundItemsOverlay);
 		rainbowRaveGroundItemsPlugin.startUp();
