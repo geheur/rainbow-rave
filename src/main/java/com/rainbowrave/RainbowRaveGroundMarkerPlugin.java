@@ -113,7 +113,13 @@ public class RainbowRaveGroundMarkerPlugin
 	{
 		points.clear();
 
-		int[] regions = client.getTopLevelWorldView().getMapRegions();
+		WorldView worldView = client.getTopLevelWorldView();
+		if (worldView == null)
+		{
+			return;
+		}
+
+		int[] regions = worldView.getMapRegions();
 
 		if (regions == null)
 		{
